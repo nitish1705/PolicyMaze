@@ -47,6 +47,11 @@ async def get_history():
                   d.scheme_name
            FROM evidence_bundles eb
            LEFT JOIN documents d ON d.id = eb.scheme_id
+           INNER JOIN (
+               SELECT scheme_id, MAX(timestamp) as max_ts
+               FROM evidence_bundles
+               GROUP BY scheme_id
+           ) latest ON eb.scheme_id = latest.scheme_id AND eb.timestamp = latest.max_ts
            ORDER BY eb.timestamp DESC
            LIMIT 50"""
     )

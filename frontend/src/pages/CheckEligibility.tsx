@@ -53,7 +53,7 @@ export default function CheckEligibility() {
       setRequiredDocs(r.required)
       setCoveredFields(r.covered_fields)
       setMissingFields(r.missing_fields)
-      setCitizenProfile(r.profile_coverage)
+      setCitizenProfile((prev) => ({ ...prev, ...r.profile_coverage }))
       setProfileLoaded(true)
     }).catch(() => setProfileLoaded(true))
   }, [selectedDoc])
