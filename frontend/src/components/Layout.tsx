@@ -1,4 +1,4 @@
-import { BookOpen, FolderOpen, GitCompare, Home, Menu, ScrollText, Shield, X } from 'lucide-react'
+import { BookOpen, ClipboardList, FolderOpen, GitCompare, Home, Menu, Shield, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 
@@ -8,7 +8,7 @@ const links = [
   { to: '/check', label: 'Check Eligibility', icon: Shield },
   { to: '/compare', label: 'Compare Schemes', icon: GitCompare },
   { to: '/documents', label: 'My Documents', icon: FolderOpen },
-  { to: '/rules', label: 'Extracted Rules', icon: ScrollText },
+  { to: '/history', label: 'My Assessments', icon: ClipboardList },
 ]
 
 export default function Layout() {

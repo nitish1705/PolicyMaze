@@ -38,6 +38,32 @@ async def check(request: EligibilityCheckRequest):
     return result
 
 
+@router.get("/history")
+async def get_history():
+    db = await get_db()
+    rows = await db.execute(
+        """SELECT eb.id as bundle_id, eb.session_id, eb.scheme_id as document_id,
+                  eb.overall_verdict, eb.summary, eb.timestamp,
+                  d.scheme_name
+           FROM evidence_bundles eb
+           LEFT JOIN documents d ON d.id = eb.scheme_id
+           ORDER BY eb.timestamp DESC
+           LIMIT 50"""
+    )
+    assessments = []
+    for row in await rows.fetchall():
+        assessments.append({
+            "bundle_id": row["bundle_id"],
+            "session_id": row["session_id"],
+            "document_id": row["document_id"],
+            "scheme_name": row["scheme_name"] or "Unknown Scheme",
+            "overall_verdict": row["overall_verdict"],
+            "summary": row["summary"],
+            "timestamp": row["timestamp"],
+        })
+    return {"assessments": assessments, "total": len(assessments)}
+
+
 @router.get("/{session_id}/trace", response_model=SessionTraceResponse)
 async def get_trace(session_id: str):
     db = await get_db()
