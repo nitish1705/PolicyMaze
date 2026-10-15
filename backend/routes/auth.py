@@ -16,10 +16,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 if not firebase_admin._apps:
+    import json as _json
     import os
+
     sa_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+    sa_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT", "")
+
     if sa_path and os.path.exists(sa_path):
         cred = credentials.Certificate(sa_path)
+        firebase_admin.initialize_app(cred)
+    elif sa_json:
+        cred = credentials.Certificate(_json.loads(sa_json))
         firebase_admin.initialize_app(cred)
     else:
         firebase_admin.initialize_app()
