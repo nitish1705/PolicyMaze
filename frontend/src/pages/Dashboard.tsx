@@ -16,15 +16,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     getSchemes().then((r) => setSchemes(r.schemes)).catch(() => {})
-    fetch('/api/catalog?per_page=1')
+    const base = import.meta.env.VITE_API_URL || '/api'
+    fetch(`${base}/catalog?per_page=1`)
       .then((r) => r.json())
       .then((data) => setCatalogStats({ total: data.total, central: 0, state: 0 }))
       .catch(() => {})
-    fetch('/api/catalog?per_page=1&search=Central')
+    fetch(`${base}/catalog?per_page=1&level=Central`)
       .then((r) => r.json())
       .then((data) => setCatalogStats((prev) => prev ? { ...prev, central: data.total } : null))
       .catch(() => {})
-    fetch('/api/catalog?per_page=1&search=State')
+    fetch(`${base}/catalog?per_page=1&level=State`)
       .then((r) => r.json())
       .then((data) => setCatalogStats((prev) => prev ? { ...prev, state: data.total } : null))
       .catch(() => {})
