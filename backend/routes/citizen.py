@@ -112,6 +112,17 @@ def _aggregate_profile(documents: list[dict]) -> dict:
         for k, v in fields.items():
             if v is not None and v != "" and k not in profile:
                 profile[k] = v
+
+    if "age" not in profile and "date_of_birth" in profile:
+        try:
+            from datetime import date
+            dob = date.fromisoformat(str(profile["date_of_birth"]))
+            today = date.today()
+            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            profile["age"] = age
+        except Exception:
+            pass
+
     return profile
 
 

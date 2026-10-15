@@ -11,18 +11,16 @@ import type { CitizenDocument } from '../types'
 const DEFAULT_DOC_TYPES = [
   'Aadhaar Card',
   'Income Certificate',
-  'Caste Certificate',
+  'Caste Certificate (SC/ST/OBC)',
   'Domicile Certificate',
-  'Age Proof / Birth Certificate',
-  'Voter ID',
-  'Ration Card (BPL/APL)',
-  'Land Records / Patta',
+  'Birth Certificate',
   'Bank Passbook',
+  'Ration Card (BPL/APL)',
   'Education Certificate',
   'Disability Certificate',
   'Marriage Certificate',
-  'Employment Proof',
-  'Farmer Registration / Kisan Card',
+  'Land Records',
+  'Kisan Card',
 ]
 
 export default function MyDocumentsPage() {
