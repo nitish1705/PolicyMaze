@@ -17,6 +17,8 @@ import type {
   SchemeListItem,
 } from '../types'
 
+const BASE = import.meta.env.VITE_API_URL || '/api'
+
 export default function CheckEligibility() {
   const [searchParams] = useSearchParams()
   const [schemes, setSchemes] = useState<SchemeListItem[]>([])
@@ -24,6 +26,7 @@ export default function CheckEligibility() {
   const [rules, setRules] = useState<ExtractedRule[]>([])
   const [result, setResult] = useState<EligibilityCheckResponse | null>(null)
   const [loading, setLoading] = useState(false)
+  const [extracting, setExtracting] = useState(false)
 
   const [citizenProfile, setCitizenProfile] = useState<Record<string, unknown>>({})
   const [requiredDocs, setRequiredDocs] = useState<RequiredDocument[]>([])
@@ -111,15 +114,37 @@ export default function CheckEligibility() {
           {profileLoaded && (
             <>
               {rules.length === 0 ? (
-                <div className="bg-gov-saffron/5 border border-gov-saffron/20 rounded-xl p-6 text-center space-y-3">
-                  <AlertCircle size={28} className="mx-auto text-gov-saffron" />
+                <div className="bg-white border border-gov-border rounded-xl p-8 text-center space-y-4">
+                  <Shield size={32} className="mx-auto text-gov-navy/30" />
                   <div>
-                    <p className="text-gov-navy font-medium">No eligibility rules extracted yet</p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      This scheme needs AI rule extraction before eligibility can be checked.
-                      Go to the <Link to="/catalog" className="text-gov-blue underline">Scheme Catalog</Link> and click "Check Eligibility" on this scheme to extract rules first.
+                    <p className="text-gov-navy font-semibold">Ready to analyze this scheme</p>
+                    <p className="text-gray-500 text-sm mt-1 max-w-md mx-auto">
+                      Our AI will read the scheme's eligibility text and extract structured rules so we can check your eligibility.
                     </p>
                   </div>
+                  <button
+                    onClick={async () => {
+                      setExtracting(true)
+                      try {
+                        const res = await fetch(`${BASE}/catalog/extract-by-document/${selectedDoc}`, { method: 'POST' })
+                        const body = await res.json()
+                        if (body.document_id) {
+                          setSelectedDoc(body.document_id)
+                        } else {
+                          getDocumentRules(selectedDoc).then((r) => setRules(r.rules)).catch(() => {})
+                        }
+                      } catch {}
+                      finally { setExtracting(false) }
+                    }}
+                    disabled={extracting}
+                    className="inline-flex items-center gap-2 bg-gov-navy text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gov-navy-light disabled:opacity-50 transition-colors"
+                  >
+                    {extracting ? (
+                      <><Loader2 size={16} className="animate-spin" /> Extracting rules with AI...</>
+                    ) : (
+                      <><Shield size={16} /> Extract Rules & Check Eligibility</>
+                    )}
+                  </button>
                 </div>
               ) : (
                 <>

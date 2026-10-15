@@ -214,6 +214,19 @@ async def extract_rules_from_catalog(catalog_id: str):
     }
 
 
+@router.post("/extract-by-document/{document_id}")
+async def extract_rules_by_document_id(document_id: str):
+    """Extract rules for a scheme identified by its documents table ID."""
+    db = await get_db()
+    cursor = await db.execute(
+        "SELECT id FROM scheme_catalog WHERE document_id = ?", (document_id,)
+    )
+    row = await cursor.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="No catalog entry for this document")
+    return await extract_rules_from_catalog(row["id"])
+
+
 @router.post("/seed")
 async def seed_database():
     db = await get_db()
