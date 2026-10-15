@@ -8,8 +8,6 @@ venv/
 data/policy_maze.db
 data/chroma/
 data/uploads/
-data/repos/schemefinder/.git/
-data/repos/yojana-setu/
 
 node_modules/
 dist/
