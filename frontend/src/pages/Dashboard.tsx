@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, FolderOpen, GitCompare, Landmark, MapPin, Shield, Users } from 'lucide-react'
+import { ArrowRight, BookOpen, FolderOpen, GitCompare, Landmark, MapPin, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSchemes } from '../api/client'
@@ -68,12 +68,11 @@ export default function Dashboard() {
 
       {/* Stats bar */}
       {catalogStats && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {[
             { label: 'Total Schemes', value: catalogStats.total.toLocaleString(), icon: BookOpen, accent: 'border-gov-saffron bg-gov-saffron/5' },
             { label: 'Central Schemes', value: catalogStats.central.toLocaleString(), icon: Landmark, accent: 'border-gov-green bg-gov-green/5' },
             { label: 'State Schemes', value: catalogStats.state.toLocaleString(), icon: MapPin, accent: 'border-gov-blue bg-gov-blue/5' },
-            { label: 'Data Sources', value: '3', icon: Users, accent: 'border-gov-maroon bg-gov-maroon/5' },
           ].map((s) => (
             <div key={s.label} className={`border-l-4 ${s.accent} bg-white rounded-r-lg p-4 shadow-sm`}>
               <div className="flex items-center justify-between">
@@ -113,7 +112,7 @@ export default function Dashboard() {
             { step: '01', title: 'Select a Scheme', desc: 'Browse 2,100+ schemes from the catalog with pre-extracted rules' },
             { step: '02', title: 'Import Documents', desc: 'Upload Aadhaar, income cert, etc. — AI extracts your details' },
             { step: '03', title: 'Auto-Check', desc: 'System maps your documents to scheme requirements automatically' },
-            { step: '04', title: 'Traced Verdict', desc: 'Deterministic engine evaluates each rule with source citations' },
+            { step: '04', title: 'Traced Verdict', desc: 'Each rule is evaluated against your profile with source citations' },
           ].map((s, i) => (
             <div key={s.step} className="relative">
               {i < 3 && <div className="hidden md:block absolute top-6 left-[calc(50%+24px)] w-[calc(100%-48px)] h-0.5 bg-gov-gold/20" />}

@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from backend.adapters.database import close_db, get_db, init_db
 from backend.application.seeder import seed_all
 from backend.contracts.errors import ApiError, ErrorCode
+from backend.routes.auth import router as auth_router
 from backend.routes.catalog import router as catalog_router
 from backend.routes.citizen import router as citizen_router
 from backend.routes.documents import router as documents_router
@@ -47,6 +48,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(documents_router)
 app.include_router(eligibility_router)
 app.include_router(schemes_router)

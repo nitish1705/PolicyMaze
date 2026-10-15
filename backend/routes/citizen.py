@@ -6,10 +6,11 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
 from backend.adapters.database import get_db
+from backend.routes.auth import get_optional_user
 from backend.adapters.llm_provider import _get_client, _clean_json_response
 from backend.adapters.pdf_provider import parse_pdf
 from backend.config import settings
@@ -92,8 +93,10 @@ async def list_document_types():
 
 @router.post("/documents", response_model=CitizenDocument)
 async def upload_citizen_document(
+    request: Request,
     file: UploadFile = File(...),
     doc_type: str = Form(...),
+    user: dict | None = Depends(get_optional_user),
 ):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
@@ -121,12 +124,13 @@ async def upload_citizen_document(
 
     doc_id = f"cdoc_{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc).isoformat()
+    user_id = user["id"] if user else None
 
     db = await get_db()
     await db.execute(
-        """INSERT INTO citizen_documents (id, doc_type, filename, raw_text, extracted_fields, upload_timestamp)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (doc_id, doc_type, file.filename, text[:5000], json.dumps(extracted), now),
+        """INSERT INTO citizen_documents (id, user_id, doc_type, filename, raw_text, extracted_fields, upload_timestamp)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (doc_id, user_id, doc_type, file.filename, text[:5000], json.dumps(extracted), now),
     )
     await db.commit()
 
@@ -140,9 +144,13 @@ async def upload_citizen_document(
 
 
 @router.get("/documents", response_model=CitizenDocumentsResponse)
-async def list_citizen_documents():
+async def list_citizen_documents(request: Request, user: dict | None = Depends(get_optional_user)):
     db = await get_db()
-    rows = await db.execute("SELECT * FROM citizen_documents ORDER BY upload_timestamp DESC")
+    user_id = user["id"] if user else None
+    if user_id:
+        rows = await db.execute("SELECT * FROM citizen_documents WHERE user_id = ? ORDER BY upload_timestamp DESC", (user_id,))
+    else:
+        rows = await db.execute("SELECT * FROM citizen_documents WHERE user_id IS NULL ORDER BY upload_timestamp DESC")
     docs = await rows.fetchall()
 
     documents = []
@@ -175,23 +183,89 @@ async def delete_citizen_document(doc_id: str):
 
 
 @router.get("/profile")
-async def get_citizen_profile():
+async def get_citizen_profile(request: Request, user: dict | None = Depends(get_optional_user)):
     db = await get_db()
-    rows = await db.execute("SELECT extracted_fields FROM citizen_documents")
+    user_id = user["id"] if user else None
+    if user_id:
+        rows = await db.execute("SELECT extracted_fields FROM citizen_documents WHERE user_id = ?", (user_id,))
+    else:
+        rows = await db.execute("SELECT extracted_fields FROM citizen_documents WHERE user_id IS NULL")
     docs = [{"extracted_fields": row["extracted_fields"]} for row in await rows.fetchall()]
     return {"profile": _aggregate_profile(docs)}
 
 
+COMMON_ELIGIBILITY_FIELDS = [
+    "age", "gender", "annual_income", "category", "state",
+    "residence_type", "occupation", "education",
+]
+
+ELIGIBILITY_TEXT_KEYWORDS: dict[str, list[str]] = {
+    "age": ["age", "years old", "born", "minor", "adult", "senior citizen"],
+    "gender": ["gender", "women", "female", "male", "girl", "boy", "transgender"],
+    "annual_income": ["income", "earning", "salary", "lakh", "bpl", "below poverty"],
+    "annual_family_income": ["family income", "household income"],
+    "category": ["caste", "sc", "st", "obc", "ews", "general", "scheduled", "backward"],
+    "state": ["domicile", "resident of", "state"],
+    "residence_type": ["rural", "urban", "village", "city"],
+    "occupation": ["occupation", "employed", "farmer", "worker", "self-employed"],
+    "is_farmer": ["farmer", "agriculture", "cultivat", "kisan"],
+    "is_student": ["student", "enrolled", "studying", "education"],
+    "education": ["education", "literate", "class", "degree", "graduate", "matricul"],
+    "marital_status": ["married", "widow", "divorced", "unmarried", "single"],
+    "disability": ["disability", "disabled", "handicap", "divyang"],
+    "land_ownership": ["land", "landless", "hectare", "acre"],
+    "bpl": ["bpl", "below poverty", "poverty line"],
+    "bank_account": ["bank account", "bank", "jan dhan"],
+    "aadhaar_card": ["aadhaar", "aadhar", "uid"],
+}
+
+
+def _infer_fields_from_text(text: str) -> list[str]:
+    text_lower = text.lower()
+    fields = []
+    for field, keywords in ELIGIBILITY_TEXT_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            fields.append(field)
+    return fields if fields else COMMON_ELIGIBILITY_FIELDS
+
+
 @router.get("/required-documents/{document_id}", response_model=RequiredDocumentsResponse)
-async def get_required_documents(document_id: str):
+async def get_required_documents(document_id: str, request: Request, user: dict | None = Depends(get_optional_user)):
     db = await get_db()
+    user_id = user["id"] if user else None
 
     rule_rows = await db.execute(
         "SELECT DISTINCT field FROM rules WHERE document_id = ?", (document_id,)
     )
     fields_needed = [row["field"] for row in await rule_rows.fetchall()]
 
-    doc_rows = await db.execute("SELECT doc_type, extracted_fields FROM citizen_documents")
+    if not fields_needed:
+        catalog_cur = await db.execute(
+            "SELECT eligibility_text, exclusions_text, documents_required FROM scheme_catalog WHERE document_id = ?",
+            (document_id,),
+        )
+        catalog_row = await catalog_cur.fetchone()
+        if not catalog_row:
+            catalog_cur = await db.execute(
+                "SELECT eligibility_text, exclusions_text, documents_required FROM scheme_catalog WHERE id = ?",
+                (document_id,),
+            )
+            catalog_row = await catalog_cur.fetchone()
+
+        if catalog_row:
+            combined = " ".join(filter(None, [
+                catalog_row["eligibility_text"],
+                catalog_row["exclusions_text"],
+                catalog_row["documents_required"],
+            ]))
+            fields_needed = _infer_fields_from_text(combined) if combined.strip() else COMMON_ELIGIBILITY_FIELDS
+        else:
+            fields_needed = COMMON_ELIGIBILITY_FIELDS
+
+    if user_id:
+        doc_rows = await db.execute("SELECT doc_type, extracted_fields FROM citizen_documents WHERE user_id = ?", (user_id,))
+    else:
+        doc_rows = await db.execute("SELECT doc_type, extracted_fields FROM citizen_documents WHERE user_id IS NULL")
     uploaded_docs = await doc_rows.fetchall()
     uploaded_types = {row["doc_type"] for row in uploaded_docs}
 

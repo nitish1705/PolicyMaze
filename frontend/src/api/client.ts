@@ -1,3 +1,4 @@
+import { auth } from '../firebase'
 import type {
   CitizenDocument,
   CitizenDocumentsResponse,
@@ -10,11 +11,24 @@ import type {
 
 const BASE = '/api'
 
+async function getAuthToken(): Promise<string | null> {
+  const user = auth.currentUser
+  if (user) {
+    return user.getIdToken()
+  }
+  return localStorage.getItem('auth_token')
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${url}`, init)
+  const headers = new Headers(init?.headers)
+  const token = await getAuthToken()
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+  const res = await fetch(`${BASE}${url}`, { ...init, headers })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.message || body.detail?.message || `Request failed: ${res.status}`)
+    throw new Error(body.message || body.detail?.message || body.detail || `Request failed: ${res.status}`)
   }
   return res.json()
 }
@@ -86,3 +100,8 @@ export async function getRequiredDocuments(documentId: string): Promise<Required
 export async function getDocumentTypes(): Promise<{ types: string[] }> {
   return request('/citizen/document-types')
 }
+
+export async function getCatalogFilters(): Promise<{ states: string[]; levels: string[]; categories: string[] }> {
+  return request('/catalog/filters')
+}
+

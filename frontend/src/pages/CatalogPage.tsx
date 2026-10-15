@@ -1,6 +1,7 @@
-import { ChevronLeft, ChevronRight, Loader2, Search, Shield } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Filter, Loader2, Search, Shield, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getCatalogFilters } from '../api/client'
 
 interface CatalogScheme {
   id: string
@@ -34,22 +35,40 @@ export default function CatalogPage() {
   const [loading, setLoading] = useState(true)
   const [extracting, setExtracting] = useState<string | null>(null)
 
+  const [levelFilter, setLevelFilter] = useState('')
+  const [stateFilter, setStateFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [filterOptions, setFilterOptions] = useState<{ states: string[]; levels: string[]; categories: string[] }>({ states: [], levels: [], categories: [] })
+
+  useEffect(() => {
+    getCatalogFilters()
+      .then(setFilterOptions)
+      .catch(() => {})
+  }, [])
+
   useEffect(() => {
     const t = setTimeout(() => { setDebouncedSearch(search); setPage(1) }, 300)
     return () => clearTimeout(t)
   }, [search])
 
   useEffect(() => {
+    setPage(1)
+  }, [levelFilter, stateFilter, categoryFilter])
+
+  useEffect(() => {
     setLoading(true)
     const params = new URLSearchParams({ page: String(page), per_page: '15' })
     if (debouncedSearch) params.set('search', debouncedSearch)
+    if (levelFilter) params.set('level', levelFilter)
+    if (stateFilter) params.set('state', stateFilter)
+    if (categoryFilter) params.set('category', categoryFilter)
 
     fetch(`/api/catalog?${params}`)
       .then((r) => r.json())
       .then(setData)
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [debouncedSearch, page])
+  }, [debouncedSearch, page, levelFilter, stateFilter, categoryFilter])
 
   const handleCheckEligibility = async (scheme: CatalogScheme) => {
     if (scheme.has_structured_rules && scheme.document_id) {
@@ -70,6 +89,9 @@ export default function CatalogPage() {
     }
   }
 
+  const hasFilters = levelFilter || stateFilter || categoryFilter
+  const clearFilters = () => { setLevelFilter(''); setStateFilter(''); setCategoryFilter('') }
+
   return (
     <div className="space-y-6">
       <div>
@@ -82,6 +104,46 @@ export default function CatalogPage() {
         </p>
       </div>
 
+      {/* Filters */}
+      <div className="bg-white border border-gov-border rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter size={16} className="text-gov-navy" />
+          <span className="text-sm font-medium text-gov-navy">Filter Schemes</span>
+          {hasFilters && (
+            <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-gov-maroon hover:text-gov-maroon/80 transition-colors">
+              <X size={12} /> Clear Filters
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <select
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value)}
+            className="px-3 py-2 border border-gov-border rounded-lg text-sm outline-none bg-white focus:ring-1 focus:ring-gov-blue"
+          >
+            <option value="">All Levels</option>
+            {filterOptions.levels.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="px-3 py-2 border border-gov-border rounded-lg text-sm outline-none bg-white focus:ring-1 focus:ring-gov-blue"
+          >
+            <option value="">All States</option>
+            {filterOptions.states.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-3 py-2 border border-gov-border rounded-lg text-sm outline-none bg-white focus:ring-1 focus:ring-gov-blue"
+          >
+            <option value="">All Categories</option>
+            {filterOptions.categories.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Search */}
       <div className="relative">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input

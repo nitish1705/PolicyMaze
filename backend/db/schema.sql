@@ -81,8 +81,17 @@ CREATE TABLE IF NOT EXISTS scheme_catalog (
     created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS citizen_documents (
     id TEXT PRIMARY KEY,
+    user_id TEXT,
     doc_type TEXT NOT NULL,
     filename TEXT NOT NULL,
     raw_text TEXT,

@@ -13,10 +13,33 @@ from backend.contracts.errors import ApiError, ErrorCode, Remediation
 router = APIRouter(prefix="/api/catalog", tags=["catalog"])
 
 
+@router.get("/filters")
+async def get_filters():
+    db = await get_db()
+    states_cur = await db.execute(
+        "SELECT DISTINCT state FROM scheme_catalog WHERE state IS NOT NULL AND state != '' ORDER BY state"
+    )
+    states = [row["state"] for row in await states_cur.fetchall()]
+
+    categories_cur = await db.execute(
+        "SELECT DISTINCT category FROM scheme_catalog WHERE category IS NOT NULL AND category != '' ORDER BY category"
+    )
+    categories = [row["category"] for row in await categories_cur.fetchall()]
+
+    levels_cur = await db.execute(
+        "SELECT DISTINCT level FROM scheme_catalog WHERE level IS NOT NULL AND level != '' ORDER BY level"
+    )
+    levels = [row["level"] for row in await levels_cur.fetchall()]
+
+    return {"states": states, "categories": categories, "levels": levels}
+
+
 @router.get("")
 async def list_catalog(
     search: str = Query("", description="Search by name, tags, or state"),
     level: str = Query("", description="Filter by level: central, state"),
+    state: str = Query("", description="Filter by state"),
+    category: str = Query("", description="Filter by category"),
     has_rules: bool | None = Query(None, description="Filter by has structured rules"),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
@@ -34,6 +57,14 @@ async def list_catalog(
     if level:
         where_clauses.append("level LIKE ?")
         params.append(f"%{level}%")
+
+    if state:
+        where_clauses.append("state = ?")
+        params.append(state)
+
+    if category:
+        where_clauses.append("category = ?")
+        params.append(category)
 
     if has_rules is not None:
         where_clauses.append("has_structured_rules = ?")

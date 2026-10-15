@@ -1,6 +1,7 @@
-import { AlertCircle, ArrowRight, CheckCircle, GitCompare, HelpCircle, Loader2, Shield, XCircle } from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckCircle, FolderOpen, GitCompare, HelpCircle, Loader2, Shield, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getSchemes } from '../api/client'
+import { Link } from 'react-router-dom'
+import { getCitizenProfile, getSchemes } from '../api/client'
 import type { SchemeListItem } from '../types'
 
 interface MultiResult {
@@ -58,20 +59,20 @@ export default function ComparePage() {
   const [mode, setMode] = useState<'multi' | 'diff'>('multi')
 
   const [selectedDocs, setSelectedDocs] = useState<string[]>([])
-  const [profile, setProfile] = useState<Record<string, string>>({
-    age: '', annual_income: '', gender: '', category: '', occupation: '',
-    is_farmer: '', is_student: '', nationality: '',
-  })
+  const [citizenProfile, setCitizenProfile] = useState<Record<string, unknown>>({})
+  const [profileLoading, setProfileLoading] = useState(true)
   const [multiResult, setMultiResult] = useState<MultiResponse | null>(null)
   const [multiLoading, setMultiLoading] = useState(false)
 
-  const [docA, setDocA] = useState('')
-  const [docB, setDocB] = useState('')
-  const [diffResult, setDiffResult] = useState<DiffResponse | null>(null)
+  const [diffResults, setDiffResults] = useState<DiffResponse[]>([])
   const [diffLoading, setDiffLoading] = useState(false)
 
   useEffect(() => {
     getSchemes().then((r) => setSchemes(r.schemes)).catch(() => {})
+    getCitizenProfile()
+      .then(({ profile: p }) => setCitizenProfile(p || {}))
+      .catch(() => {})
+      .finally(() => setProfileLoading(false))
   }, [])
 
   const toggleScheme = (docId: string) => {
@@ -80,40 +81,48 @@ export default function ComparePage() {
     )
   }
 
+  const profileFields = Object.entries(citizenProfile).filter(([, v]) => v !== null && v !== undefined && v !== '')
+  const hasProfile = profileFields.length > 0
+
   const runMultiCheck = async () => {
     if (selectedDocs.length === 0) return
     setMultiLoading(true)
     setMultiResult(null)
     try {
-      const profileData: Record<string, unknown> = {}
-      for (const [k, v] of Object.entries(profile)) {
-        if (!v) continue
-        if (v === 'true') profileData[k] = true
-        else if (v === 'false') profileData[k] = false
-        else if (!isNaN(Number(v))) profileData[k] = Number(v)
-        else profileData[k] = v
-      }
       const res = await fetch('/api/eligibility/multi-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_ids: selectedDocs, profile: profileData }),
+        body: JSON.stringify({ document_ids: selectedDocs, profile: citizenProfile }),
       })
       setMultiResult(await res.json())
     } catch { /* ignore */ }
     finally { setMultiLoading(false) }
   }
 
+  const [diffDocs, setDiffDocs] = useState<string[]>([])
+
+  const toggleDiffDoc = (docId: string) => {
+    setDiffDocs((prev) =>
+      prev.includes(docId) ? prev.filter((d) => d !== docId) : [...prev, docId]
+    )
+  }
+
   const runDiff = async () => {
-    if (!docA || !docB) return
+    if (diffDocs.length < 2) return
+    const docsToCompare = diffDocs
     setDiffLoading(true)
-    setDiffResult(null)
+    setDiffResults([])
     try {
-      const res = await fetch('/api/documents/diff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_id_a: docA, document_id_b: docB }),
-      })
-      setDiffResult(await res.json())
+      const results: DiffResponse[] = []
+      for (let i = 0; i < docsToCompare.length - 1; i++) {
+        const res = await fetch('/api/documents/diff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ document_id_a: docsToCompare[i], document_id_b: docsToCompare[i + 1] }),
+        })
+        results.push(await res.json())
+      }
+      setDiffResults(results)
     } catch { /* ignore */ }
     finally { setDiffLoading(false) }
   }
@@ -178,21 +187,43 @@ export default function ComparePage() {
           </div>
 
           <div className="bg-white border border-gov-border rounded-xl p-5">
-            <h3 className="font-semibold text-gov-navy mb-3">Your Profile</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {Object.entries(profile).map(([key, val]) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-gov-navy/70 mb-1 capitalize">{key.replace(/_/g, ' ')}</label>
-                  <input
-                    type="text"
-                    value={val}
-                    onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
-                    className="w-full px-2 py-1.5 border border-gov-border rounded text-sm outline-none focus:ring-1 focus:ring-gov-blue bg-white"
-                    placeholder="..."
-                  />
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gov-navy">Your Profile</h3>
+              {hasProfile && (
+                <span className="text-xs text-gov-green font-medium flex items-center gap-1">
+                  <CheckCircle size={12} /> {profileFields.length} fields from your documents
+                </span>
+              )}
             </div>
+            {profileLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 size={18} className="animate-spin text-gov-navy/40" />
+              </div>
+            ) : hasProfile ? (
+              <div className="flex flex-wrap gap-2">
+                {profileFields.map(([key, val]) => (
+                  <div key={key} className="flex items-center gap-1.5 bg-gov-green/5 border border-gov-green/20 rounded-lg px-3 py-1.5">
+                    <CheckCircle size={12} className="text-gov-green" />
+                    <span className="text-xs text-gov-navy capitalize">{key.replace(/_/g, ' ')}</span>
+                    <span className="text-xs text-gov-green font-medium">{String(val)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Link
+                to="/documents"
+                className="flex items-center gap-3 bg-gov-saffron/5 border border-gov-saffron/20 rounded-lg px-4 py-4 hover:border-gov-gold transition-colors group"
+              >
+                <FolderOpen size={20} className="text-gov-saffron" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gov-navy">Import your documents first</div>
+                  <div className="text-xs text-gray-500">Upload Aadhaar, income certificate, etc. to auto-fill your profile</div>
+                </div>
+                <div className="flex items-center gap-1 text-gov-gold text-xs font-medium group-hover:gap-2 transition-all">
+                  Import <ArrowRight size={12} />
+                </div>
+              </Link>
+            )}
           </div>
 
           <button
@@ -232,41 +263,47 @@ export default function ComparePage() {
 
       {mode === 'diff' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gov-navy mb-1">Document A</label>
-              <select value={docA} onChange={(e) => setDocA(e.target.value)} className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm outline-none bg-white focus:ring-1 focus:ring-gov-blue">
-                <option value="">Select...</option>
-                {schemes.map((s) => <option key={s.document_id} value={s.document_id}>{s.scheme_name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gov-navy mb-1">Document B</label>
-              <select value={docB} onChange={(e) => setDocB(e.target.value)} className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm outline-none bg-white focus:ring-1 focus:ring-gov-blue">
-                <option value="">Select...</option>
-                {schemes.map((s) => <option key={s.document_id} value={s.document_id}>{s.scheme_name}</option>)}
-              </select>
+          <p className="text-xs text-gray-500 -mt-2">Select multiple policies to compare rules and detect conflicts between them</p>
+
+          <div className="bg-white border border-gov-border rounded-xl p-5">
+            <h3 className="font-semibold text-gov-navy mb-3">Select Policies to Compare ({diffDocs.length} selected)</h3>
+            <div className="max-h-48 overflow-y-auto space-y-1">
+              {schemes.map((s) => (
+                <label key={s.document_id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gov-gold/5 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={diffDocs.includes(s.document_id)}
+                    onChange={() => toggleDiffDoc(s.document_id)}
+                    className="rounded text-gov-navy"
+                  />
+                  <span className="flex-1 text-gov-navy">{s.scheme_name}</span>
+                  <span className="text-xs text-gray-400">{s.rule_count} rules</span>
+                </label>
+              ))}
             </div>
           </div>
 
           <button
             onClick={runDiff}
-            disabled={diffLoading || !docA || !docB}
+            disabled={diffLoading || diffDocs.length < 2}
             className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
           >
-            {diffLoading ? <><Loader2 size={18} className="animate-spin" /> Comparing...</> : <><GitCompare size={18} /> Compare Documents</>}
+            {diffLoading ? <><Loader2 size={18} className="animate-spin" /> Comparing...</> : <><GitCompare size={18} /> Compare {diffDocs.length} Documents</>}
           </button>
 
-          {diffResult && (
-            <div className="space-y-6">
+          {diffResults.map((diffResult, idx) => (
+            <div key={idx} className="space-y-4 border border-gov-border rounded-xl p-5 bg-white">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gov-navy/5 rounded-lg p-4 text-sm border border-gov-border">
                   <div className="font-medium text-gov-navy">{diffResult.document_a.name}</div>
                   <div className="text-gray-500">{diffResult.document_a.rule_count} rules</div>
                 </div>
-                <div className="bg-gov-navy/5 rounded-lg p-4 text-sm border border-gov-border">
-                  <div className="font-medium text-gov-navy">{diffResult.document_b.name}</div>
-                  <div className="text-gray-500">{diffResult.document_b.rule_count} rules</div>
+                <div className="bg-gov-navy/5 rounded-lg p-4 text-sm border border-gov-border flex items-center gap-2">
+                  <ArrowRight size={16} className="text-gov-gold shrink-0" />
+                  <div>
+                    <div className="font-medium text-gov-navy">{diffResult.document_b.name}</div>
+                    <div className="text-gray-500">{diffResult.document_b.rule_count} rules</div>
+                  </div>
                 </div>
               </div>
 
@@ -282,7 +319,7 @@ export default function ComparePage() {
               </div>
 
               {diffResult.diffs.length > 0 && (
-                <div className="bg-white border border-gov-border rounded-xl overflow-hidden">
+                <div className="border border-gov-border rounded-xl overflow-hidden">
                   <div className="px-4 py-3 bg-gov-navy/5 border-b border-gov-border font-medium text-sm text-gov-navy">Rule Changes</div>
                   {diffResult.diffs.map((d, i) => (
                     <div key={i} className="px-4 py-3 border-b border-gray-100 last:border-0 text-sm">
@@ -301,7 +338,7 @@ export default function ComparePage() {
               )}
 
               {diffResult.conflicts.length > 0 && (
-                <div className="bg-white border border-gov-maroon/30 rounded-xl overflow-hidden">
+                <div className="border border-gov-maroon/30 rounded-xl overflow-hidden">
                   <div className="px-4 py-3 bg-gov-maroon/5 border-b border-gov-maroon/20 font-medium text-sm text-gov-maroon">Conflicts Detected</div>
                   {diffResult.conflicts.map((c) => (
                     <div key={c.conflict_id} className="px-4 py-3 border-b border-gov-maroon/10 last:border-0 text-sm">
@@ -321,7 +358,7 @@ export default function ComparePage() {
                 </div>
               )}
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>

@@ -1,6 +1,8 @@
-import { BookOpen, ClipboardList, FolderOpen, GitCompare, Home, Menu, Shield, X } from 'lucide-react'
-import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { BookOpen, ClipboardList, FolderOpen, GitCompare, Home, LogIn, LogOut, Menu, Shield, ShieldCheck, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { auth } from '../firebase'
 
 const links = [
   { to: '/', label: 'Home', icon: Home },
@@ -13,6 +15,29 @@ const links = [
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserName(user.displayName || user.email?.split('@')[0] || 'User')
+      } else {
+        setUserName(null)
+      }
+    })
+    return unsub
+  }, [])
+
+  const isLoggedIn = !!userName
+
+  const handleLogout = async () => {
+    await signOut(auth)
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_name')
+    localStorage.removeItem('user_email')
+    navigate('/login')
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gov-cream">
@@ -25,14 +50,12 @@ export default function Layout() {
 
       {/* Main header */}
       <header className="bg-gov-navy text-white">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-gov-gold/20 border-2 border-gov-gold flex items-center justify-center text-gov-gold font-bold text-lg shrink-0">
-            PM
-          </div>
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <ShieldCheck size={28} className="text-gov-gold shrink-0" />
           <div className="flex-1">
-            <h1 className="text-xl font-bold tracking-wide">Policy Maze</h1>
-            <p className="text-gov-gold-light text-xs mt-0.5 tracking-wide">
-              National Eligibility Decision Support System &mdash; AI-Powered Policy Interpretation
+            <h1 className="text-lg font-bold tracking-wide">Policy Maze</h1>
+            <p className="text-gov-gold-light text-[11px] mt-0.5 tracking-wide">
+              Government Scheme Eligibility Portal
             </p>
           </div>
           <button
@@ -41,10 +64,25 @@ export default function Layout() {
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <div className="hidden md:flex items-center gap-3 text-xs text-gov-gold-light">
-            <span>Byteathon 2026</span>
-            <span className="w-1 h-1 rounded-full bg-gov-gold" />
-            <span>BYTE02</span>
+          <div className="hidden md:flex items-center gap-3">
+            {isLoggedIn ? (
+              <>
+                <span className="text-xs text-gov-gold-light">{userName}</span>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 text-xs text-gov-gold-light hover:text-white transition-colors"
+                >
+                  <LogOut size={14} /> Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 text-xs bg-gov-gold/20 text-gov-gold px-3 py-1.5 rounded-lg hover:bg-gov-gold/30 transition-colors font-medium"
+              >
+                <LogIn size={14} /> Login
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -74,13 +112,6 @@ export default function Layout() {
         </div>
       </nav>
 
-      {/* Breadcrumb strip */}
-      <div className="bg-gov-gold/10 border-b border-gov-border">
-        <div className="max-w-7xl mx-auto px-4 py-2 text-xs text-gov-navy/60">
-          Government Scheme Eligibility Portal &mdash; Powered by Neurosymbolic AI
-        </div>
-      </div>
-
       {/* Main content */}
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -108,15 +139,14 @@ export default function Layout() {
               </ul>
             </div>
             <div>
-              <h4 className="text-gov-gold font-semibold mb-2 uppercase tracking-wider text-[11px]">Technology</h4>
+              <h4 className="text-gov-gold font-semibold mb-2 uppercase tracking-wider text-[11px]">Contact Us</h4>
               <p className="leading-relaxed">
-                Neurosymbolic architecture: LLM extracts rules, deterministic engine evaluates.
-                Every decision is traceable to source document text.
+                For queries and support, contact the helpdesk at support@policymaze.gov.in
               </p>
             </div>
           </div>
           <div className="border-t border-gray-700 mt-4 pt-4 flex justify-between items-center">
-            <span className="text-[10px]">Byteathon 2026 &middot; Problem Statement BYTE02</span>
+            <span className="text-[10px]">&copy; 2026 Policy Maze &mdash; Government Scheme Eligibility Portal</span>
             <div className="flex gap-0.5 h-1">
               <div className="w-8 bg-gov-saffron rounded-sm" />
               <div className="w-8 bg-white rounded-sm" />
