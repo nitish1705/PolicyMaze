@@ -1,8 +1,20 @@
-import { AlertCircle, ArrowRight, CheckCircle, FolderOpen, GitCompare, HelpCircle, Loader2, Shield, XCircle } from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckCircle, FolderOpen, GitCompare, HelpCircle, Loader2, Search, Shield, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getCitizenProfile, getSchemes } from '../api/client'
-import type { SchemeListItem } from '../types'
+import { getCitizenProfile } from '../api/client'
+
+const BASE = import.meta.env.VITE_API_URL || '/api'
+
+interface CatalogScheme {
+  id: string
+  name: string
+  level: string
+  state: string | null
+  category: string | null
+  tags: string
+  has_structured_rules: boolean
+  document_id: string | null
+}
 
 interface MultiResult {
   session_id: string
@@ -55,10 +67,15 @@ interface DiffResponse {
 }
 
 export default function ComparePage() {
-  const [schemes, setSchemes] = useState<SchemeListItem[]>([])
+  const [catalogSchemes, setCatalogSchemes] = useState<CatalogScheme[]>([])
+  const [catalogTotal, setCatalogTotal] = useState(0)
+  const [catalogPage, setCatalogPage] = useState(1)
+  const [catalogSearch, setCatalogSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [catalogLoading, setCatalogLoading] = useState(true)
   const [mode, setMode] = useState<'multi' | 'diff'>('multi')
 
-  const [selectedDocs, setSelectedDocs] = useState<string[]>([])
+  const [selectedSchemes, setSelectedSchemes] = useState<Map<string, CatalogScheme>>(new Map())
   const [citizenProfile, setCitizenProfile] = useState<Record<string, unknown>>({})
   const [profileLoading, setProfileLoading] = useState(true)
   const [multiResult, setMultiResult] = useState<MultiResponse | null>(null)
@@ -68,57 +85,99 @@ export default function ComparePage() {
   const [diffLoading, setDiffLoading] = useState(false)
 
   useEffect(() => {
-    getSchemes().then((r) => setSchemes(r.schemes)).catch(() => {})
     getCitizenProfile()
       .then(({ profile: p }) => setCitizenProfile(p || {}))
       .catch(() => {})
       .finally(() => setProfileLoading(false))
   }, [])
 
-  const toggleScheme = (docId: string) => {
-    setSelectedDocs((prev) =>
-      prev.includes(docId) ? prev.filter((d) => d !== docId) : [...prev, docId]
-    )
+  useEffect(() => {
+    const t = setTimeout(() => { setDebouncedSearch(catalogSearch); setCatalogPage(1) }, 300)
+    return () => clearTimeout(t)
+  }, [catalogSearch])
+
+  useEffect(() => {
+    setCatalogLoading(true)
+    const params = new URLSearchParams({ page: String(catalogPage), per_page: '20' })
+    if (debouncedSearch) params.set('search', debouncedSearch)
+    fetch(`${BASE}/catalog?${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setCatalogSchemes(data.schemes || [])
+        setCatalogTotal(data.total || 0)
+      })
+      .catch(() => {})
+      .finally(() => setCatalogLoading(false))
+  }, [debouncedSearch, catalogPage])
+
+  const toggleScheme = (scheme: CatalogScheme) => {
+    setSelectedSchemes((prev) => {
+      const next = new Map(prev)
+      if (next.has(scheme.id)) next.delete(scheme.id)
+      else next.set(scheme.id, scheme)
+      return next
+    })
   }
+
+  const selectedDocs = [...selectedSchemes.values()]
 
   const profileFields = Object.entries(citizenProfile).filter(([, v]) => v !== null && v !== undefined && v !== '')
   const hasProfile = profileFields.length > 0
+
+  const ensureDocumentId = async (scheme: CatalogScheme): Promise<string | null> => {
+    if (scheme.has_structured_rules && scheme.document_id) return scheme.document_id
+    try {
+      const res = await fetch(`${BASE}/catalog/${scheme.id}/extract`, { method: 'POST' })
+      const body = await res.json()
+      return body.document_id || null
+    } catch { return null }
+  }
 
   const runMultiCheck = async () => {
     if (selectedDocs.length === 0) return
     setMultiLoading(true)
     setMultiResult(null)
     try {
-      const res = await fetch('/api/eligibility/multi-check', {
+      const docIds = await Promise.all(selectedDocs.map(ensureDocumentId))
+      const validIds = docIds.filter((id): id is string => id !== null)
+      if (validIds.length === 0) return
+      const res = await fetch(`${BASE}/eligibility/multi-check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_ids: selectedDocs, profile: citizenProfile }),
+        body: JSON.stringify({ document_ids: validIds, profile: citizenProfile }),
       })
       setMultiResult(await res.json())
     } catch { /* ignore */ }
     finally { setMultiLoading(false) }
   }
 
-  const [diffDocs, setDiffDocs] = useState<string[]>([])
+  const [diffSchemes, setDiffSchemes] = useState<Map<string, CatalogScheme>>(new Map())
 
-  const toggleDiffDoc = (docId: string) => {
-    setDiffDocs((prev) =>
-      prev.includes(docId) ? prev.filter((d) => d !== docId) : [...prev, docId]
-    )
+  const toggleDiffScheme = (scheme: CatalogScheme) => {
+    setDiffSchemes((prev) => {
+      const next = new Map(prev)
+      if (next.has(scheme.id)) next.delete(scheme.id)
+      else next.set(scheme.id, scheme)
+      return next
+    })
   }
+
+  const diffDocs = [...diffSchemes.values()]
 
   const runDiff = async () => {
     if (diffDocs.length < 2) return
-    const docsToCompare = diffDocs
     setDiffLoading(true)
     setDiffResults([])
     try {
+      const docIds = await Promise.all(diffDocs.map(ensureDocumentId))
+      const validIds = docIds.filter((id): id is string => id !== null)
+      if (validIds.length < 2) return
       const results: DiffResponse[] = []
-      for (let i = 0; i < docsToCompare.length - 1; i++) {
-        const res = await fetch('/api/documents/diff', {
+      for (let i = 0; i < validIds.length - 1; i++) {
+        const res = await fetch(`${BASE}/documents/diff`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ document_id_a: docsToCompare[i], document_id_b: docsToCompare[i + 1] }),
+          body: JSON.stringify({ document_id_a: validIds[i], document_id_b: validIds[i + 1] }),
         })
         results.push(await res.json())
       }
@@ -169,20 +228,73 @@ export default function ComparePage() {
       {mode === 'multi' && (
         <div className="space-y-6">
           <div className="bg-white border border-gov-border rounded-xl p-5">
-            <h3 className="font-semibold text-gov-navy mb-3">Select Schemes ({selectedDocs.length} selected)</h3>
-            <div className="max-h-48 overflow-y-auto space-y-1">
-              {schemes.map((s) => (
-                <label key={s.document_id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gov-gold/5 cursor-pointer text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedDocs.includes(s.document_id)}
-                    onChange={() => toggleScheme(s.document_id)}
-                    className="rounded text-gov-navy"
-                  />
-                  <span className="flex-1 text-gov-navy">{s.scheme_name}</span>
-                  <span className="text-xs text-gray-400">{s.rule_count} rules</span>
-                </label>
-              ))}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gov-navy">Select Schemes ({selectedSchemes.size} selected)</h3>
+              <span className="text-xs text-gray-400">{catalogTotal} schemes available</span>
+            </div>
+            <div className="relative mb-3">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={catalogSearch}
+                onChange={(e) => setCatalogSearch(e.target.value)}
+                placeholder="Search schemes..."
+                className="w-full pl-9 pr-3 py-2 border border-gov-border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-gov-blue"
+              />
+            </div>
+            {selectedSchemes.size > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {[...selectedSchemes.values()].map((s) => (
+                  <span
+                    key={s.id}
+                    onClick={() => toggleScheme(s)}
+                    className="text-xs bg-gov-navy/10 text-gov-navy px-2 py-1 rounded-full cursor-pointer hover:bg-gov-maroon/10 hover:text-gov-maroon transition-colors"
+                  >
+                    {s.name} ×
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="max-h-56 overflow-y-auto space-y-0.5 border border-gov-border/50 rounded-lg">
+              {catalogLoading ? (
+                <div className="flex items-center justify-center py-6"><Loader2 size={18} className="animate-spin text-gov-navy/40" /></div>
+              ) : catalogSchemes.length === 0 ? (
+                <div className="text-center py-6 text-sm text-gray-400">No schemes found</div>
+              ) : (
+                <>
+                  {catalogSchemes.map((s) => (
+                    <label key={s.id} className="flex items-center gap-2 px-3 py-2 hover:bg-gov-gold/5 cursor-pointer text-sm border-b border-gov-border/20 last:border-0">
+                      <input
+                        type="checkbox"
+                        checked={selectedSchemes.has(s.id)}
+                        onChange={() => toggleScheme(s)}
+                        className="rounded text-gov-navy shrink-0"
+                      />
+                      <span className="flex-1 text-gov-navy truncate">{s.name}</span>
+                      {s.level && <span className="text-[10px] bg-gov-navy/5 text-gov-navy/50 px-1.5 py-0.5 rounded shrink-0">{s.level.includes('Central') ? 'Central' : 'State'}</span>}
+                    </label>
+                  ))}
+                  {catalogTotal > 20 && (
+                    <div className="flex items-center justify-center gap-3 py-2 border-t border-gov-border/30">
+                      <button
+                        onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}
+                        disabled={catalogPage <= 1}
+                        className="text-xs text-gov-navy/60 hover:text-gov-navy disabled:opacity-30"
+                      >
+                        ← Prev
+                      </button>
+                      <span className="text-xs text-gray-400">Page {catalogPage}</span>
+                      <button
+                        onClick={() => setCatalogPage((p) => p + 1)}
+                        disabled={catalogSchemes.length < 20}
+                        className="text-xs text-gov-navy/60 hover:text-gov-navy disabled:opacity-30"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -228,10 +340,10 @@ export default function ComparePage() {
 
           <button
             onClick={runMultiCheck}
-            disabled={multiLoading || selectedDocs.length === 0}
+            disabled={multiLoading || selectedSchemes.size === 0}
             className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
           >
-            {multiLoading ? <><Loader2 size={18} className="animate-spin" /> Checking...</> : <><Shield size={18} /> Check {selectedDocs.length} Schemes</>}
+            {multiLoading ? <><Loader2 size={18} className="animate-spin" /> Extracting rules & checking...</> : <><Shield size={18} /> Check {selectedSchemes.size} Schemes</>}
           </button>
 
           {multiResult && (
@@ -266,29 +378,82 @@ export default function ComparePage() {
           <p className="text-xs text-gray-500 -mt-2">Select multiple policies to compare rules and detect conflicts between them</p>
 
           <div className="bg-white border border-gov-border rounded-xl p-5">
-            <h3 className="font-semibold text-gov-navy mb-3">Select Policies to Compare ({diffDocs.length} selected)</h3>
-            <div className="max-h-48 overflow-y-auto space-y-1">
-              {schemes.map((s) => (
-                <label key={s.document_id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gov-gold/5 cursor-pointer text-sm">
-                  <input
-                    type="checkbox"
-                    checked={diffDocs.includes(s.document_id)}
-                    onChange={() => toggleDiffDoc(s.document_id)}
-                    className="rounded text-gov-navy"
-                  />
-                  <span className="flex-1 text-gov-navy">{s.scheme_name}</span>
-                  <span className="text-xs text-gray-400">{s.rule_count} rules</span>
-                </label>
-              ))}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gov-navy">Select Policies to Compare ({diffSchemes.size} selected)</h3>
+              <span className="text-xs text-gray-400">{catalogTotal} schemes available</span>
+            </div>
+            <div className="relative mb-3">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={catalogSearch}
+                onChange={(e) => setCatalogSearch(e.target.value)}
+                placeholder="Search schemes..."
+                className="w-full pl-9 pr-3 py-2 border border-gov-border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-gov-blue"
+              />
+            </div>
+            {diffSchemes.size > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {[...diffSchemes.values()].map((s) => (
+                  <span
+                    key={s.id}
+                    onClick={() => toggleDiffScheme(s)}
+                    className="text-xs bg-gov-navy/10 text-gov-navy px-2 py-1 rounded-full cursor-pointer hover:bg-gov-maroon/10 hover:text-gov-maroon transition-colors"
+                  >
+                    {s.name} ×
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="max-h-56 overflow-y-auto space-y-0.5 border border-gov-border/50 rounded-lg">
+              {catalogLoading ? (
+                <div className="flex items-center justify-center py-6"><Loader2 size={18} className="animate-spin text-gov-navy/40" /></div>
+              ) : catalogSchemes.length === 0 ? (
+                <div className="text-center py-6 text-sm text-gray-400">No schemes found</div>
+              ) : (
+                <>
+                  {catalogSchemes.map((s) => (
+                    <label key={s.id} className="flex items-center gap-2 px-3 py-2 hover:bg-gov-gold/5 cursor-pointer text-sm border-b border-gov-border/20 last:border-0">
+                      <input
+                        type="checkbox"
+                        checked={diffSchemes.has(s.id)}
+                        onChange={() => toggleDiffScheme(s)}
+                        className="rounded text-gov-navy shrink-0"
+                      />
+                      <span className="flex-1 text-gov-navy truncate">{s.name}</span>
+                      {s.level && <span className="text-[10px] bg-gov-navy/5 text-gov-navy/50 px-1.5 py-0.5 rounded shrink-0">{s.level.includes('Central') ? 'Central' : 'State'}</span>}
+                    </label>
+                  ))}
+                  {catalogTotal > 20 && (
+                    <div className="flex items-center justify-center gap-3 py-2 border-t border-gov-border/30">
+                      <button
+                        onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}
+                        disabled={catalogPage <= 1}
+                        className="text-xs text-gov-navy/60 hover:text-gov-navy disabled:opacity-30"
+                      >
+                        ← Prev
+                      </button>
+                      <span className="text-xs text-gray-400">Page {catalogPage}</span>
+                      <button
+                        onClick={() => setCatalogPage((p) => p + 1)}
+                        disabled={catalogSchemes.length < 20}
+                        className="text-xs text-gov-navy/60 hover:text-gov-navy disabled:opacity-30"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
           <button
             onClick={runDiff}
-            disabled={diffLoading || diffDocs.length < 2}
+            disabled={diffLoading || diffSchemes.size < 2}
             className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
           >
-            {diffLoading ? <><Loader2 size={18} className="animate-spin" /> Comparing...</> : <><GitCompare size={18} /> Compare {diffDocs.length} Documents</>}
+            {diffLoading ? <><Loader2 size={18} className="animate-spin" /> Comparing...</> : <><GitCompare size={18} /> Compare {diffSchemes.size} Documents</>}
           </button>
 
           {diffResults.map((diffResult, idx) => (
