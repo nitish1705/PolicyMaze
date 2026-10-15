@@ -74,6 +74,35 @@ def _extract_fields_from_text(text: str, doc_type: str, filename: str) -> dict:
         return {}
 
 
+def _extract_fields_from_image(file_path, doc_type: str, filename: str) -> dict:
+    import io
+
+    import pymupdf
+
+    try:
+        doc = pymupdf.open(str(file_path))
+        ocr_texts = []
+        for page in doc:
+            pix = page.get_pixmap(dpi=300)
+            img_bytes = pix.tobytes("png")
+            from PIL import Image
+            import pytesseract
+            img = Image.open(io.BytesIO(img_bytes))
+            ocr_text = pytesseract.image_to_string(img)
+            ocr_texts.append(ocr_text)
+        doc.close()
+        text = "\n".join(ocr_texts).strip()
+    except Exception:
+        logger.exception("OCR extraction failed")
+        return {}
+
+    if not text:
+        return {}
+
+    logger.info("OCR extracted %d chars from scanned PDF", len(text))
+    return _extract_fields_from_text(text, doc_type, filename)
+
+
 def _aggregate_profile(documents: list[dict]) -> dict:
     profile: dict = {}
     for doc in documents:
@@ -108,7 +137,9 @@ async def upload_citizen_document(
     file_path = upload_dir / f"{uuid.uuid4().hex}_{file.filename}"
     file_path.write_bytes(content)
 
-    if file.filename.lower().endswith(".pdf"):
+    is_pdf = file.filename.lower().endswith(".pdf")
+    text = ""
+    if is_pdf:
         try:
             parsed = parse_pdf(file_path)
             text = parsed.markdown_text
@@ -120,7 +151,12 @@ async def upload_citizen_document(
         except Exception:
             text = ""
 
-    extracted = _extract_fields_from_text(text, doc_type, file.filename)
+    if text.strip():
+        extracted = _extract_fields_from_text(text, doc_type, file.filename)
+    elif is_pdf:
+        extracted = _extract_fields_from_image(file_path, doc_type, file.filename)
+    else:
+        extracted = {}
 
     doc_id = f"cdoc_{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc).isoformat()
