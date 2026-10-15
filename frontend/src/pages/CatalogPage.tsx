@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Filter, Loader2, Search, Shield, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getCatalogFilters } from '../api/client'
 
 interface CatalogScheme {
@@ -24,6 +24,14 @@ interface CatalogResponse {
   page: number
   per_page: number
   pages: number
+}
+
+function parseTags(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed.map(String)
+  } catch {}
+  return raw.split(',').map((t) => t.trim()).filter(Boolean)
 }
 
 export default function CatalogPage() {
@@ -63,7 +71,7 @@ export default function CatalogPage() {
     if (stateFilter) params.set('state', stateFilter)
     if (categoryFilter) params.set('category', categoryFilter)
 
-    fetch(`/api/catalog?${params}`)
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/catalog?${params}`)
       .then((r) => r.json())
       .then(setData)
       .catch(() => {})
@@ -175,19 +183,19 @@ export default function CatalogPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-medium text-gov-navy text-sm">{scheme.name}</h3>
+                    <Link to={`/catalog/${scheme.id}`} className="font-medium text-gov-navy text-sm hover:text-gov-blue hover:underline transition-colors">{scheme.name}</Link>
                     {scheme.level && (
                       <span className="text-xs bg-gov-navy/5 text-gov-navy/70 px-2 py-0.5 rounded">
                         {scheme.level.includes('Central') ? 'Central' : scheme.level.includes('State') ? 'State' : scheme.level}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{scheme.description}</p>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{(scheme.description || '').replace(/^Introduction:\s*/i, '')}</p>
                   {scheme.tags && (
-                    <div className="flex gap-1 mt-2 flex-wrap">
-                      {scheme.tags.split(',').slice(0, 4).map((tag) => (
-                        <span key={tag} className="text-xs bg-gov-blue/10 text-gov-blue px-1.5 py-0.5 rounded">
-                          {tag.trim()}
+                    <div className="flex gap-1.5 mt-2 flex-wrap">
+                      {parseTags(scheme.tags).slice(0, 4).map((tag) => (
+                        <span key={tag} className="text-xs bg-gov-blue/10 text-gov-blue px-2 py-0.5 rounded-full capitalize">
+                          {tag.replace(/_/g, ' ')}
                         </span>
                       ))}
                     </div>

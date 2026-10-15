@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import LoginPage from './pages/LoginPage'
 import MyDocumentsPage from './pages/MyDocumentsPage'
 import RegisterPage from './pages/RegisterPage'
+import SchemeDetailPage from './pages/SchemeDetailPage'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/catalog/:id" element={<SchemeDetailPage />} />
         <Route path="/check" element={<CheckEligibility />} />
         <Route path="/compare" element={<ComparePage />} />
         <Route path="/documents" element={<MyDocumentsPage />} />
