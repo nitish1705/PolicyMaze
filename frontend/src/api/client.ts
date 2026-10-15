@@ -5,6 +5,7 @@ import type {
   DocumentRulesResponse,
   DocumentUploadResponse,
   EligibilityCheckResponse,
+  RecommendationsResponse,
   RequiredDocumentsResponse,
   SchemeListResponse,
 } from '../types'
@@ -104,5 +105,9 @@ export async function getDocumentTypes(): Promise<{ types: string[] }> {
 
 export async function getCatalogFilters(): Promise<{ states: string[]; levels: string[]; categories: string[] }> {
   return request('/catalog/filters')
+}
+
+export async function getRecommendations(): Promise<RecommendationsResponse> {
+  return request('/citizen/recommendations')
 }
 

@@ -1,8 +1,9 @@
-import { ArrowRight, BookOpen, FolderOpen, GitCompare, Landmark, MapPin, Shield } from 'lucide-react'
+import { ArrowRight, BookOpen, FolderOpen, GitCompare, Landmark, MapPin, Shield, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { getSchemes } from '../api/client'
+import RecommendedSchemes from '../components/RecommendedSchemes'
 import type { SchemeListItem } from '../types'
 
 interface CatalogStats {
@@ -87,6 +88,18 @@ export default function Dashboard() {
           ))}
         </div>
       )}
+
+      {/* Personalised recommendations */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-6 bg-gov-maroon rounded-full" />
+          <h2 className="text-lg font-bold text-gov-navy dark:text-slate-100 flex items-center gap-2">
+            Recommended for You
+            <Sparkles size={16} className="text-gov-gold" />
+          </h2>
+        </div>
+        <RecommendedSchemes />
+      </div>
 
       {/* Services grid */}
       <div>

@@ -276,6 +276,173 @@ def _infer_fields_from_text(text: str) -> list[str]:
     return fields if fields else COMMON_ELIGIBILITY_FIELDS
 
 
+def _score_scheme(row: dict, profile: dict) -> tuple[int, list[str]]:
+    """Score a catalog scheme against a citizen profile. Returns (score, reasons)."""
+    score = 0
+    reasons: list[str] = []
+
+    tags_raw = row.get("tags") or ""
+    try:
+        tags: list[str] = json.loads(tags_raw) if tags_raw.startswith("[") else [t.strip() for t in tags_raw.split(",") if t.strip()]
+    except Exception:
+        tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
+    tags_lower = [t.lower() for t in tags]
+
+    eligibility = ((row.get("eligibility_text") or "") + " " + (row.get("description") or "")).lower()
+    level = str(row.get("level") or "").lower()
+    scheme_state = str(row.get("state") or "").lower()
+
+    # Central schemes get a small base score — relevant to everyone
+    if "central" in level:
+        score += 1
+
+    # State match
+    citizen_state = str(profile.get("state", "")).lower()
+    if citizen_state and scheme_state and (citizen_state in scheme_state or scheme_state in citizen_state):
+        score += 4
+        reasons.append(f"{profile.get('state')} state scheme")
+
+    # Category match (SC / ST / OBC / EWS / BPL)
+    category = str(profile.get("category", "")).lower()
+    CATEGORY_MAP = {
+        "sc": ["sc", "scheduled caste", "dalit"],
+        "st": ["st", "scheduled tribe", "tribal", "adivasi"],
+        "obc": ["obc", "other backward"],
+        "ews": ["ews", "economically weaker"],
+        "general": [],
+    }
+    for cat_key, cat_terms in CATEGORY_MAP.items():
+        if cat_key in category or any(t in category for t in cat_terms):
+            all_terms = [cat_key] + cat_terms
+            if any(t in tags_lower for t in all_terms) or any(t in eligibility for t in all_terms):
+                score += 4
+                reasons.append(f"{cat_key.upper()} category")
+            break
+
+    # BPL / low income
+    income = profile.get("annual_income") or profile.get("annual_family_income")
+    if income is not None:
+        try:
+            income_val = float(income)
+            if income_val < 100000 and ("bpl" in eligibility or "below poverty" in eligibility):
+                score += 3
+                reasons.append("BPL income")
+            if income_val < 200000 and ("2 lakh" in eligibility or "2,00,000" in eligibility or "1.5 lakh" in eligibility):
+                score += 2
+                reasons.append("Low income")
+        except (ValueError, TypeError):
+            pass
+
+    # Farmer
+    occupation = str(profile.get("occupation", "")).lower()
+    FARMER_TERMS = ["farmer", "kisan", "agriculture", "cultivat", "farming"]
+    if any(t in occupation for t in FARMER_TERMS):
+        if any(t in tags_lower for t in FARMER_TERMS) or any(t in eligibility for t in FARMER_TERMS):
+            score += 4
+            reasons.append("For farmers")
+
+    # Senior citizen
+    age = profile.get("age")
+    if age is not None:
+        try:
+            age_val = int(age)
+            if age_val >= 60 and ("senior" in eligibility or "elderly" in eligibility or "old age" in eligibility):
+                score += 3
+                reasons.append("Senior citizen")
+        except (ValueError, TypeError):
+            pass
+
+    # Gender
+    gender = str(profile.get("gender", "")).lower()
+    if "female" in gender or "woman" in gender or "girl" in gender:
+        if any(t in tags_lower for t in ["women", "woman", "girl", "female", "mahila"]) or \
+           any(t in eligibility for t in ["women", "girl", "female", "mahila"]):
+            score += 3
+            reasons.append("For women")
+
+    # Disability
+    if profile.get("disability") or "disabled" in occupation:
+        if any(t in eligibility for t in ["disabled", "disability", "divyang", "handicap"]):
+            score += 3
+            reasons.append("For disabled persons")
+
+    # Student / education
+    if profile.get("is_student") or "student" in occupation:
+        if any(t in tags_lower for t in ["student", "education", "scholarship"]) or \
+           any(t in eligibility for t in ["student", "scholarship", "education"]):
+            score += 3
+            reasons.append("For students")
+
+    # General keyword overlap from known profile fields
+    FIELD_KEYWORDS = {
+        "land_ownership": ["land", "landless", "landowner", "hectare", "acre"],
+        "aadhaar_card": ["aadhaar", "aadhar"],
+        "bank_account": ["bank account", "jan dhan"],
+        "residence_type": ["rural", "urban"],
+    }
+    for field, keywords in FIELD_KEYWORDS.items():
+        if field in profile:
+            if any(kw in eligibility for kw in keywords):
+                score += 1
+
+    return score, reasons
+
+
+@router.get("/recommendations")
+async def get_recommendations(request: Request, user: dict | None = Depends(get_optional_user)):
+    db = await get_db()
+    user_id = user["id"] if user else None
+
+    # Load citizen profile
+    if user_id:
+        rows = await db.execute("SELECT extracted_fields FROM citizen_documents WHERE user_id = ?", (user_id,))
+    else:
+        rows = await db.execute("SELECT extracted_fields FROM citizen_documents WHERE user_id IS NULL")
+    docs = [{"extracted_fields": row["extracted_fields"]} for row in await rows.fetchall()]
+    profile = _aggregate_profile(docs)
+
+    if not profile:
+        return {"recommendations": [], "profile_field_count": 0}
+
+    # Fetch a broad sample from catalog (avoid full table scan on large DBs)
+    cursor = await db.execute(
+        """SELECT id, name, level, state, category, tags, description,
+                  eligibility_text, has_structured_rules, document_id
+           FROM scheme_catalog
+           ORDER BY RANDOM()
+           LIMIT 600"""
+    )
+    schemes = await cursor.fetchall()
+
+    scored = []
+    for s in schemes:
+        row = dict(s)
+        score, reasons = _score_scheme(row, profile)
+        if score >= 3:
+            tags_raw = row.get("tags") or ""
+            try:
+                tags = json.loads(tags_raw) if tags_raw.startswith("[") else [t.strip() for t in tags_raw.split(",") if t.strip()]
+            except Exception:
+                tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
+
+            scored.append({
+                "id": row["id"],
+                "name": row["name"],
+                "level": row["level"] or "",
+                "state": row["state"],
+                "description": (row["description"] or "")[:200],
+                "tags": [t for t in tags[:5] if t],
+                "match_score": score,
+                "match_reasons": reasons[:3],
+                "has_structured_rules": bool(row["has_structured_rules"]),
+                "document_id": row["document_id"],
+            })
+
+    scored.sort(key=lambda x: (x["match_score"], x["has_structured_rules"]), reverse=True)
+
+    return {"recommendations": scored[:8], "profile_field_count": len(profile)}
+
+
 @router.get("/required-documents/{document_id}", response_model=RequiredDocumentsResponse)
 async def get_required_documents(document_id: str, request: Request, user: dict | None = Depends(get_optional_user)):
     db = await get_db()

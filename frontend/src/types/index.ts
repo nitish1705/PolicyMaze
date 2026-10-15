@@ -139,3 +139,21 @@ export interface RequiredDocumentsResponse {
   missing_fields: string[]
   covered_fields: string[]
 }
+
+export interface Recommendation {
+  id: string
+  name: string
+  level: string
+  state: string | null
+  description: string
+  tags: string[]
+  match_score: number
+  match_reasons: string[]
+  has_structured_rules: boolean
+  document_id: string | null
+}
+
+export interface RecommendationsResponse {
+  recommendations: Recommendation[]
+  profile_field_count: number
+}
