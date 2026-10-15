@@ -1,10 +1,21 @@
+import { AlertCircle, ArrowRight, CheckCircle, FolderOpen, Loader2, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { getDocumentRules, getSchemes } from '../api/client'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  checkEligibility,
+  getCitizenProfile,
+  getDocumentRules,
+  getRequiredDocuments,
+  getSchemes,
+} from '../api/client'
 import EligibilityResult from '../components/EligibilityResult'
 import ReasoningTrace from '../components/ReasoningTrace'
-import UserProfileForm from '../components/UserProfileForm'
-import type { EligibilityCheckResponse, ExtractedRule, SchemeListItem } from '../types'
+import type {
+  EligibilityCheckResponse,
+  ExtractedRule,
+  RequiredDocument,
+  SchemeListItem,
+} from '../types'
 
 export default function CheckEligibility() {
   const [searchParams] = useSearchParams()
@@ -12,6 +23,13 @@ export default function CheckEligibility() {
   const [selectedDoc, setSelectedDoc] = useState(searchParams.get('doc') || '')
   const [rules, setRules] = useState<ExtractedRule[]>([])
   const [result, setResult] = useState<EligibilityCheckResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const [citizenProfile, setCitizenProfile] = useState<Record<string, unknown>>({})
+  const [requiredDocs, setRequiredDocs] = useState<RequiredDocument[]>([])
+  const [coveredFields, setCoveredFields] = useState<string[]>([])
+  const [missingFields, setMissingFields] = useState<string[]>([])
+  const [profileLoaded, setProfileLoaded] = useState(false)
 
   useEffect(() => {
     getSchemes().then((r) => {
@@ -20,53 +38,167 @@ export default function CheckEligibility() {
         setSelectedDoc(r.schemes[0].document_id)
       }
     }).catch(() => {})
+    getCitizenProfile()
+      .then((r) => setCitizenProfile(r.profile))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
     if (!selectedDoc) return
     setRules([])
     setResult(null)
+    setProfileLoaded(false)
     getDocumentRules(selectedDoc).then((r) => setRules(r.rules)).catch(() => {})
+    getRequiredDocuments(selectedDoc).then((r) => {
+      setRequiredDocs(r.required)
+      setCoveredFields(r.covered_fields)
+      setMissingFields(r.missing_fields)
+      setCitizenProfile(r.profile_coverage)
+      setProfileLoaded(true)
+    }).catch(() => setProfileLoaded(true))
   }, [selectedDoc])
+
+  const handleCheck = async () => {
+    if (!selectedDoc) return
+    setLoading(true)
+    setResult(null)
+    try {
+      const res = await checkEligibility(selectedDoc, citizenProfile)
+      setResult(res)
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const missingDocsNeeded = requiredDocs.filter((d) => !d.is_uploaded)
+  const allFieldsCovered = missingFields.length === 0
+  const totalFields = coveredFields.length + missingFields.length
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Check Eligibility</h1>
-        <p className="text-gray-500 mt-1">Fill your details to check eligibility against a loaded policy scheme</p>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-1 h-6 bg-gov-green rounded-full" />
+          <h1 className="text-xl font-bold text-gov-navy">Check Eligibility</h1>
+        </div>
+        <p className="text-gray-500 text-sm ml-3">Select a scheme to automatically verify eligibility using your imported documents</p>
       </div>
 
       {schemes.length === 0 ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-          <p className="text-yellow-700 font-medium">No schemes loaded yet.</p>
-          <p className="text-yellow-600 text-sm mt-1">Upload a policy PDF first from the Upload page.</p>
+        <div className="bg-gov-gold/10 border border-gov-gold/30 rounded-xl p-6 text-center">
+          <p className="text-gov-navy font-medium">No schemes loaded yet.</p>
+          <p className="text-gov-navy/60 text-sm mt-1">Browse the catalog to extract rules from a scheme first.</p>
         </div>
       ) : (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Scheme</label>
+            <label className="block text-sm font-medium text-gov-navy mb-1">Select Scheme</label>
             <select
               value={selectedDoc}
               onChange={(e) => setSelectedDoc(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
             >
               {schemes.map((s) => (
                 <option key={s.document_id} value={s.document_id}>
-                  {s.scheme_name} ({s.rule_count} rules, {s.version || 'no version'})
+                  {s.scheme_name} ({s.rule_count} rules)
                 </option>
               ))}
             </select>
           </div>
 
-          {rules.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Profile</h2>
-              <UserProfileForm
-                documentId={selectedDoc}
-                rules={rules}
-                onResult={setResult}
-              />
-            </div>
+          {profileLoaded && rules.length > 0 && (
+            <>
+              {/* Profile coverage status */}
+              <div className="bg-white border border-gov-border rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-5 bg-gov-blue rounded-full" />
+                    <h2 className="text-base font-semibold text-gov-navy">Profile Coverage</h2>
+                  </div>
+                  <div className="text-xs text-gov-navy/60">
+                    {coveredFields.length}/{totalFields} fields available
+                  </div>
+                </div>
+
+                {/* Coverage bar */}
+                <div className="w-full bg-gray-100 rounded-full h-2.5">
+                  <div
+                    className={`h-2.5 rounded-full transition-all ${allFieldsCovered ? 'bg-gov-green' : coveredFields.length > 0 ? 'bg-gov-saffron' : 'bg-gov-maroon'}`}
+                    style={{ width: `${totalFields > 0 ? (coveredFields.length / totalFields) * 100 : 0}%` }}
+                  />
+                </div>
+
+                {/* Covered fields */}
+                {coveredFields.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-gov-green mb-2 flex items-center gap-1">
+                      <CheckCircle size={12} /> Fields from your documents
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {coveredFields.map((f) => (
+                        <div key={f} className="flex items-center gap-1.5 bg-gov-green/5 border border-gov-green/20 rounded-lg px-3 py-1.5">
+                          <CheckCircle size={12} className="text-gov-green" />
+                          <span className="text-xs text-gov-navy capitalize">{f.replace(/_/g, ' ')}</span>
+                          <span className="text-xs text-gov-green font-medium">
+                            {String(citizenProfile[f] ?? '')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Missing fields → required documents */}
+                {missingFields.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-gov-saffron mb-2 flex items-center gap-1">
+                      <AlertCircle size={12} /> Missing information &mdash; import these documents
+                    </div>
+                    <div className="space-y-2">
+                      {missingDocsNeeded.map((doc) => (
+                        <Link
+                          key={doc.doc_type}
+                          to="/documents"
+                          className="flex items-center gap-3 bg-gov-saffron/5 border border-gov-saffron/20 rounded-lg px-4 py-3 hover:border-gov-gold transition-colors group"
+                        >
+                          <FolderOpen size={18} className="text-gov-saffron" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gov-navy">{doc.doc_type}</div>
+                            <div className="text-xs text-gray-500">
+                              Provides: {doc.covers_fields.map((f) => f.replace(/_/g, ' ')).join(', ')}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-gov-gold text-xs font-medium group-hover:gap-2 transition-all">
+                            Import <ArrowRight size={12} />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Check eligibility button */}
+              <button
+                onClick={handleCheck}
+                disabled={loading || coveredFields.length === 0}
+                className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+              >
+                {loading ? (
+                  <><Loader2 size={18} className="animate-spin" /> Evaluating...</>
+                ) : (
+                  <><Shield size={18} /> Check Eligibility{!allFieldsCovered && missingFields.length > 0 ? ` (${missingFields.length} fields missing)` : ''}</>
+                )}
+              </button>
+
+              {!allFieldsCovered && coveredFields.length > 0 && (
+                <p className="text-xs text-gov-navy/50 text-center -mt-4">
+                  You can still check with partial data &mdash; missing fields will show as "insufficient data" in the result.
+                </p>
+              )}
+            </>
           )}
 
           {result && (

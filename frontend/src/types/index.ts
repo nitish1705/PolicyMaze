@@ -113,3 +113,29 @@ export interface SchemeListResponse {
   schemes: SchemeListItem[]
   total: number
 }
+
+export interface CitizenDocument {
+  id: string
+  doc_type: string
+  filename: string
+  extracted_fields: Record<string, unknown>
+  upload_timestamp: string
+}
+
+export interface CitizenDocumentsResponse {
+  documents: CitizenDocument[]
+  aggregated_profile: Record<string, unknown>
+}
+
+export interface RequiredDocument {
+  doc_type: string
+  covers_fields: string[]
+  is_uploaded: boolean
+}
+
+export interface RequiredDocumentsResponse {
+  required: RequiredDocument[]
+  profile_coverage: Record<string, unknown>
+  missing_fields: string[]
+  covered_fields: string[]
+}

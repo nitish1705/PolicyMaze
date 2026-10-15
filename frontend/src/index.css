@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@theme {
+  --color-gov-navy: #1a2744;
+  --color-gov-navy-light: #243556;
+  --color-gov-blue: #2563eb;
+  --color-gov-gold: #c49a1c;
+  --color-gov-gold-light: #f5e6b8;
+  --color-gov-saffron: #ff9933;
+  --color-gov-green: #138808;
+  --color-gov-maroon: #7b1f2e;
+  --color-gov-cream: #faf8f0;
+  --color-gov-border: #d4c5a0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

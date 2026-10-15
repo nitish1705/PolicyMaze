@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Shield, ScrollText, ArrowRight } from 'lucide-react'
+import { ArrowRight, BookOpen, FolderOpen, GitCompare, ScrollText, Shield, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSchemes } from '../api/client'
@@ -27,144 +27,184 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Policy Maze</h1>
-        <p className="text-gray-500 mt-2">
-          AI-powered policy interpretation with traceable eligibility decisions.
-          Browse {catalogStats ? catalogStats.total.toLocaleString() : '2,000+'} government schemes, extract rules automatically, and check eligibility with full reasoning traces.
-        </p>
+      {/* Hero banner */}
+      <div className="bg-gradient-to-r from-gov-navy to-gov-navy-light rounded-xl p-8 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gov-gold/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="relative">
+          <div className="flex items-center gap-2 text-gov-gold text-xs font-semibold tracking-wider uppercase mb-3">
+            <Shield size={14} />
+            National Eligibility Decision Support
+          </div>
+          <h1 className="text-2xl font-bold leading-tight">
+            Know Your Entitlements.<br />
+            <span className="text-gov-gold">Every Decision Explained.</span>
+          </h1>
+          <p className="text-gray-300 mt-3 max-w-xl text-sm leading-relaxed">
+            Browse {catalogStats ? catalogStats.total.toLocaleString() : '2,000+'} government schemes,
+            verify eligibility with AI-powered rule extraction, and receive fully traceable decisions
+            citing exact policy document text.
+          </p>
+          <div className="flex gap-3 mt-6">
+            <Link
+              to="/catalog"
+              className="bg-gov-gold text-gov-navy px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-gov-gold/90 transition-colors"
+            >
+              Browse Schemes
+            </Link>
+            <Link
+              to="/check"
+              className="border border-gov-gold/40 text-gov-gold px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-white/5 transition-colors"
+            >
+              Check Eligibility
+            </Link>
+          </div>
+        </div>
       </div>
 
+      {/* Stats bar */}
       {catalogStats && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 text-center">
-            <div className="text-3xl font-bold text-indigo-700">{catalogStats.total.toLocaleString()}</div>
-            <div className="text-sm text-indigo-600 mt-1">Schemes in Catalog</div>
-          </div>
-          <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
-            <div className="text-3xl font-bold text-green-700">{catalogStats.with_rules}</div>
-            <div className="text-sm text-green-600 mt-1">With Pre-extracted Rules</div>
-          </div>
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 text-center">
-            <div className="text-3xl font-bold text-purple-700">{schemes.length}</div>
-            <div className="text-sm text-purple-600 mt-1">Ready for Eligibility Check</div>
-          </div>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label: 'Total Schemes', value: catalogStats.total.toLocaleString(), icon: BookOpen, accent: 'border-gov-saffron bg-gov-saffron/5' },
+            { label: 'Rules Extracted', value: String(catalogStats.with_rules), icon: ScrollText, accent: 'border-gov-green bg-gov-green/5' },
+            { label: 'Ready to Check', value: String(schemes.length), icon: Shield, accent: 'border-gov-blue bg-gov-blue/5' },
+            { label: 'Data Sources', value: '3', icon: Users, accent: 'border-gov-maroon bg-gov-maroon/5' },
+          ].map((s) => (
+            <div key={s.label} className={`border-l-4 ${s.accent} bg-white rounded-r-lg p-4 shadow-sm`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-gov-navy">{s.value}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                </div>
+                <s.icon size={24} className="text-gray-300" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4">
-        <ActionCard
-          icon={BookOpen}
-          title="Browse Catalog"
-          desc="2,000+ schemes from myScheme.gov.in"
-          to="/catalog"
-          color="amber"
-        />
-        <ActionCard
-          icon={Shield}
-          title="Check Eligibility"
-          desc="Evaluate against extracted rules"
-          to="/check"
-          color="green"
-        />
-        <ActionCard
-          icon={FileText}
-          title="Upload Policy"
-          desc="Parse a PDF with AI extraction"
-          to="/upload"
-          color="indigo"
-        />
-        <ActionCard
-          icon={ScrollText}
-          title="View Rules"
-          desc="Browse rules with source citations"
-          to="/rules"
-          color="purple"
-        />
+      {/* Services grid */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-6 bg-gov-gold rounded-full" />
+          <h2 className="text-lg font-bold text-gov-navy">Citizen Services</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <ServiceCard icon={BookOpen} title="Scheme Catalog" desc="Browse 2,100+ central & state government schemes" to="/catalog" />
+          <ServiceCard icon={Shield} title="Eligibility Check" desc="Verify your eligibility with traceable AI decisions" to="/check" />
+          <ServiceCard icon={GitCompare} title="Compare Schemes" desc="Multi-scheme check and policy conflict analysis" to="/compare" />
+          <ServiceCard icon={FolderOpen} title="My Documents" desc="Import personal documents for auto-filled eligibility checks" to="/documents" />
+        </div>
       </div>
 
-      {schemes.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Schemes with Rules</h2>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden max-h-96 overflow-y-auto">
-            {schemes.map((s) => (
-              <div key={s.document_id} className="flex items-center justify-between px-5 py-3 border-b border-gray-100 last:border-0">
-                <div>
-                  <div className="font-medium text-gray-900 text-sm">{s.scheme_name}</div>
-                  <div className="text-xs text-gray-500">
-                    {s.rule_count} rules &middot;{' '}
-                    {s.extraction_confidence ? `${(s.extraction_confidence * 100).toFixed(0)}%` : 'N/A'}
-                  </div>
-                </div>
-                <Link
-                  to={`/check?doc=${s.document_id}`}
-                  className="text-indigo-600 hover:text-indigo-700 text-xs font-medium flex items-center gap-1"
-                >
-                  Check <ArrowRight size={12} />
-                </Link>
-              </div>
-            ))}
-          </div>
+      {/* How it works */}
+      <div className="bg-white rounded-xl border border-gov-border p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-1 h-6 bg-gov-green rounded-full" />
+          <h2 className="text-lg font-bold text-gov-navy">How It Works</h2>
         </div>
-      )}
-
-      <div className="bg-gray-100 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">How It Works</h2>
-        <div className="grid grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-4 gap-6">
           {[
-            { step: '1', title: 'Browse or Upload', desc: 'Pick from 2000+ schemes or upload a PDF' },
-            { step: '2', title: 'AI Extracts Rules', desc: 'Regex + LLM extract structured rules' },
-            { step: '3', title: 'Fill Profile', desc: 'Enter your information in a dynamic form' },
-            { step: '4', title: 'Get Verdict', desc: 'Deterministic engine evaluates with full trace' },
-          ].map((s) => (
-            <div key={s.step} className="text-center">
-              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center mx-auto mb-2 text-sm font-bold">
-                {s.step}
+            { step: '01', title: 'Select a Scheme', desc: 'Browse 2,100+ schemes from the catalog with pre-extracted rules' },
+            { step: '02', title: 'Import Documents', desc: 'Upload Aadhaar, income cert, etc. — AI extracts your details' },
+            { step: '03', title: 'Auto-Check', desc: 'System maps your documents to scheme requirements automatically' },
+            { step: '04', title: 'Traced Verdict', desc: 'Deterministic engine evaluates each rule with source citations' },
+          ].map((s, i) => (
+            <div key={s.step} className="relative">
+              {i < 3 && <div className="hidden md:block absolute top-6 left-[calc(50%+24px)] w-[calc(100%-48px)] h-0.5 bg-gov-gold/20" />}
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-gov-navy text-gov-gold flex items-center justify-center mx-auto mb-3 text-sm font-bold border-2 border-gov-gold/30">
+                  {s.step}
+                </div>
+                <div className="font-semibold text-gov-navy text-sm">{s.title}</div>
+                <div className="text-gray-500 text-xs mt-1 leading-relaxed">{s.desc}</div>
               </div>
-              <div className="font-medium text-gray-900">{s.title}</div>
-              <div className="text-gray-500 text-xs mt-1">{s.desc}</div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Available schemes table */}
+      {schemes.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-6 bg-gov-saffron rounded-full" />
+              <h2 className="text-lg font-bold text-gov-navy">Schemes Ready for Eligibility Check</h2>
+            </div>
+            <Link to="/catalog" className="text-gov-blue text-sm font-medium flex items-center gap-1 hover:underline">
+              View All <ArrowRight size={14} />
+            </Link>
+          </div>
+          <div className="bg-white rounded-xl border border-gov-border overflow-hidden shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gov-navy/5 border-b border-gov-border">
+                  <th className="text-left px-4 py-3 font-semibold text-gov-navy text-xs uppercase tracking-wider">Scheme Name</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gov-navy text-xs uppercase tracking-wider">Rules</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gov-navy text-xs uppercase tracking-wider">Confidence</th>
+                  <th className="text-right px-4 py-3 font-semibold text-gov-navy text-xs uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schemes.slice(0, 10).map((s) => (
+                  <tr key={s.document_id} className="border-b border-gray-100 hover:bg-gov-gold/5 transition-colors">
+                    <td className="px-4 py-3 font-medium text-gov-navy">{s.scheme_name}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="bg-gov-blue/10 text-gov-blue px-2 py-0.5 rounded text-xs font-medium">{s.rule_count}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {s.extraction_confidence ? (
+                        <span className={`text-xs font-medium ${s.extraction_confidence >= 0.9 ? 'text-gov-green' : 'text-gov-saffron'}`}>
+                          {(s.extraction_confidence * 100).toFixed(0)}%
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">N/A</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        to={`/check?doc=${s.document_id}`}
+                        className="inline-flex items-center gap-1 text-gov-blue hover:text-gov-navy text-xs font-medium"
+                      >
+                        Check Eligibility <ArrowRight size={12} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-function ActionCard({
+function ServiceCard({
   icon: Icon,
   title,
   desc,
   to,
-  color,
 }: {
-  icon: typeof FileText
+  icon: typeof BookOpen
   title: string
   desc: string
   to: string
-  color: string
 }) {
-  const colors: Record<string, string> = {
-    indigo: 'bg-indigo-50 border-indigo-200 hover:border-indigo-400',
-    green: 'bg-green-50 border-green-200 hover:border-green-400',
-    purple: 'bg-purple-50 border-purple-200 hover:border-purple-400',
-    amber: 'bg-amber-50 border-amber-200 hover:border-amber-400',
-  }
-  const iconColors: Record<string, string> = {
-    indigo: 'text-indigo-600',
-    green: 'text-green-600',
-    purple: 'text-purple-600',
-    amber: 'text-amber-600',
-  }
-
   return (
     <Link
       to={to}
-      className={`border rounded-xl p-5 transition-colors ${colors[color]}`}
+      className="bg-white border border-gov-border rounded-xl p-5 hover:shadow-md hover:border-gov-gold/50 transition-all group"
     >
-      <Icon size={28} className={iconColors[color]} />
-      <h3 className="font-semibold text-gray-900 mt-3">{title}</h3>
-      <p className="text-sm text-gray-500 mt-1">{desc}</p>
+      <div className="w-10 h-10 rounded-lg bg-gov-navy/5 flex items-center justify-center group-hover:bg-gov-gold/10 transition-colors">
+        <Icon size={20} className="text-gov-navy" />
+      </div>
+      <h3 className="font-semibold text-gov-navy mt-3 text-sm">{title}</h3>
+      <p className="text-xs text-gray-500 mt-1 leading-relaxed">{desc}</p>
+      <div className="flex items-center gap-1 text-gov-gold text-xs font-medium mt-3 group-hover:gap-2 transition-all">
+        Access Service <ArrowRight size={12} />
+      </div>
     </Link>
   )
 }

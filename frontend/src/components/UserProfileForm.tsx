@@ -78,7 +78,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f) => (
           <div key={f.field}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gov-navy mb-1 capitalize">
               {f.label}
             </label>
             {f.type === 'boolean' ? (
@@ -88,7 +88,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
                   const v = e.target.value
                   set(f.field, v === '' ? undefined : v === 'true')
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
               >
                 <option value="">-- Not provided --</option>
                 <option value="true">Yes</option>
@@ -98,7 +98,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
               <select
                 value={String(values[f.field] ?? '')}
                 onChange={(e) => set(f.field, e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
               >
                 <option value="">-- Not provided --</option>
                 {f.options.map((opt) => (
@@ -111,7 +111,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
                 value={values[f.field] === undefined ? '' : String(values[f.field])}
                 onChange={(e) => set(f.field, e.target.value === '' ? undefined : Number(e.target.value))}
                 placeholder={`Enter ${f.label.toLowerCase()}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
               />
             ) : (
               <input
@@ -119,7 +119,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
                 value={String(values[f.field] ?? '')}
                 onChange={(e) => set(f.field, e.target.value || undefined)}
                 placeholder={`Enter ${f.label.toLowerCase()}`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
               />
             )}
           </div>
@@ -127,7 +127,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+        <div className="bg-gov-maroon/5 border border-gov-maroon/30 text-gov-maroon rounded-lg px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -135,7 +135,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+        className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
       >
         {loading ? (
           <>

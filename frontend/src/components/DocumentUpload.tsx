@@ -52,7 +52,7 @@ export default function DocumentUpload({ onUploaded }: Props) {
           if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0])
         }}
         className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors cursor-pointer ${
-          dragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-gray-400'
+          dragging ? 'border-gov-gold bg-gov-gold/5' : 'border-gov-border hover:border-gov-gold/60'
         }`}
         onClick={() => {
           const input = document.createElement('input')
@@ -63,15 +63,15 @@ export default function DocumentUpload({ onUploaded }: Props) {
         }}
       >
         {file ? (
-          <div className="flex items-center justify-center gap-3 text-green-700">
+          <div className="flex items-center justify-center gap-3 text-gov-green">
             <FileCheck size={28} />
             <span className="font-medium">{file.name}</span>
             <span className="text-sm text-gray-500">({(file.size / 1024).toFixed(0)} KB)</span>
           </div>
         ) : (
           <div className="text-gray-500">
-            <Upload size={36} className="mx-auto mb-3 text-gray-400" />
-            <p className="font-medium">Drop a policy PDF here or click to browse</p>
+            <Upload size={36} className="mx-auto mb-3 text-gov-navy/30" />
+            <p className="font-medium text-gov-navy">Drop a policy PDF here or click to browse</p>
             <p className="text-sm mt-1">Supports government scheme documents</p>
           </div>
         )}
@@ -79,29 +79,29 @@ export default function DocumentUpload({ onUploaded }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Scheme Name *</label>
+          <label className="block text-sm font-medium text-gov-navy mb-1">Scheme Name *</label>
           <input
             type="text"
             value={schemeName}
             onChange={(e) => setSchemeName(e.target.value)}
             placeholder="e.g. PM Kisan Samman Nidhi"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Version</label>
+          <label className="block text-sm font-medium text-gov-navy mb-1">Version</label>
           <input
             type="text"
             value={version}
             onChange={(e) => setVersion(e.target.value)}
             placeholder="e.g. 2023"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
           />
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+        <div className="bg-gov-maroon/5 border border-gov-maroon/30 text-gov-maroon rounded-lg px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -109,7 +109,7 @@ export default function DocumentUpload({ onUploaded }: Props) {
       <button
         onClick={handleSubmit}
         disabled={loading || !file || !schemeName.trim()}
-        className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+        className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
       >
         {loading ? (
           <>

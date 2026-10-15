@@ -1,7 +1,10 @@
 import type {
+  CitizenDocument,
+  CitizenDocumentsResponse,
   DocumentRulesResponse,
   DocumentUploadResponse,
   EligibilityCheckResponse,
+  RequiredDocumentsResponse,
   SchemeListResponse,
 } from '../types'
 
@@ -49,4 +52,37 @@ export async function checkEligibility(
 
 export async function getSchemes(): Promise<SchemeListResponse> {
   return request<SchemeListResponse>('/schemes')
+}
+
+export async function getCitizenDocuments(): Promise<CitizenDocumentsResponse> {
+  return request<CitizenDocumentsResponse>('/citizen/documents')
+}
+
+export async function uploadCitizenDocument(
+  file: File,
+  docType: string,
+): Promise<CitizenDocument> {
+  const form = new FormData()
+  form.append('file', file)
+  form.append('doc_type', docType)
+  return request<CitizenDocument>('/citizen/documents', {
+    method: 'POST',
+    body: form,
+  })
+}
+
+export async function deleteCitizenDocument(docId: string): Promise<void> {
+  await request(`/citizen/documents/${docId}`, { method: 'DELETE' })
+}
+
+export async function getCitizenProfile(): Promise<{ profile: Record<string, unknown> }> {
+  return request('/citizen/profile')
+}
+
+export async function getRequiredDocuments(documentId: string): Promise<RequiredDocumentsResponse> {
+  return request<RequiredDocumentsResponse>(`/citizen/required-documents/${documentId}`)
+}
+
+export async function getDocumentTypes(): Promise<{ types: string[] }> {
+  return request('/citizen/document-types')
 }

@@ -29,23 +29,26 @@ export default function RulesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Extracted Rules</h1>
-        <p className="text-gray-500 mt-1">Browse rules extracted from policy documents with source citations</p>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-1 h-6 bg-gov-blue rounded-full" />
+          <h1 className="text-xl font-bold text-gov-navy">Extracted Rules</h1>
+        </div>
+        <p className="text-gray-500 text-sm ml-3">Browse rules extracted from policy documents with source citations</p>
       </div>
 
       {schemes.length === 0 ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-          <p className="text-yellow-700 font-medium">No schemes loaded yet.</p>
-          <p className="text-yellow-600 text-sm mt-1">Upload a policy PDF first from the Upload page.</p>
+        <div className="bg-gov-gold/10 border border-gov-gold/30 rounded-xl p-6 text-center">
+          <p className="text-gov-navy font-medium">No schemes loaded yet.</p>
+          <p className="text-gov-navy/60 text-sm mt-1">Upload a policy PDF first from the Upload page.</p>
         </div>
       ) : (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Scheme</label>
+            <label className="block text-sm font-medium text-gov-navy mb-1">Select Scheme</label>
             <select
               value={selectedDoc}
               onChange={(e) => setSelectedDoc(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
             >
               {schemes.map((s) => (
                 <option key={s.document_id} value={s.document_id}>

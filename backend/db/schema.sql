@@ -81,6 +81,15 @@ CREATE TABLE IF NOT EXISTS scheme_catalog (
     created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS citizen_documents (
+    id TEXT PRIMARY KEY,
+    doc_type TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    raw_text TEXT,
+    extracted_fields TEXT NOT NULL DEFAULT '{}',
+    upload_timestamp TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS evidence_bundles (
     id TEXT PRIMARY KEY,
     session_id TEXT REFERENCES sessions(id),

@@ -9,6 +9,7 @@ from backend.adapters.database import close_db, get_db, init_db
 from backend.application.seeder import seed_all
 from backend.contracts.errors import ApiError, ErrorCode
 from backend.routes.catalog import router as catalog_router
+from backend.routes.citizen import router as citizen_router
 from backend.routes.documents import router as documents_router
 from backend.routes.eligibility import router as eligibility_router
 from backend.routes.schemes import router as schemes_router
@@ -50,6 +51,7 @@ app.include_router(documents_router)
 app.include_router(eligibility_router)
 app.include_router(schemes_router)
 app.include_router(catalog_router)
+app.include_router(citizen_router)
 app.include_router(webhooks_router)
 
 
