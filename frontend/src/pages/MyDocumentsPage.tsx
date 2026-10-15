@@ -8,10 +8,27 @@ import {
 } from '../api/client'
 import type { CitizenDocument } from '../types'
 
+const DEFAULT_DOC_TYPES = [
+  'Aadhaar Card',
+  'Income Certificate',
+  'Caste Certificate',
+  'Domicile Certificate',
+  'Age Proof / Birth Certificate',
+  'Voter ID',
+  'Ration Card (BPL/APL)',
+  'Land Records / Patta',
+  'Bank Passbook',
+  'Education Certificate',
+  'Disability Certificate',
+  'Marriage Certificate',
+  'Employment Proof',
+  'Farmer Registration / Kisan Card',
+]
+
 export default function MyDocumentsPage() {
   const [documents, setDocuments] = useState<CitizenDocument[]>([])
   const [profile, setProfile] = useState<Record<string, unknown>>({})
-  const [docTypes, setDocTypes] = useState<string[]>([])
+  const [docTypes, setDocTypes] = useState<string[]>(DEFAULT_DOC_TYPES)
   const [uploading, setUploading] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
   const [selectedType, setSelectedType] = useState('')
@@ -29,7 +46,11 @@ export default function MyDocumentsPage() {
 
   useEffect(() => {
     load()
-    getDocumentTypes().then((r) => setDocTypes(r.types)).catch(() => {})
+    getDocumentTypes()
+      .then((r) => {
+        if (r.types && r.types.length > 0) setDocTypes(r.types)
+      })
+      .catch(() => {})
   }, [])
 
   const handleUpload = async () => {
