@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pymupdf
+pymupdf4llm
+groq
+aiosqlite
+python-multipart
+httpx
+pydantic
+pydantic-settings
+python-dotenv

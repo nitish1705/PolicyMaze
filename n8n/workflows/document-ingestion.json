@@ -1,0 +1,62 @@
+{
+  "name": "Policy Maze — Document Ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "document-ingested",
+        "responseMode": "onReceived"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.rule_count }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Has Rules?",
+      "type": "n8n-nodes-base.if",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "message": "=New policy ingested: {{ $json.scheme_name }}\nRules extracted: {{ $json.rule_count }}\nConfidence: {{ $json.confidence }}",
+        "additionalFields": {}
+      },
+      "name": "Notify Success",
+      "type": "n8n-nodes-base.noOp",
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "message": "=Warning: Policy {{ $json.scheme_name }} ingested but no rules extracted. Manual review required.",
+        "additionalFields": {}
+      },
+      "name": "Alert No Rules",
+      "type": "n8n-nodes-base.noOp",
+      "position": [650, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Has Rules?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Has Rules?": {
+      "main": [
+        [{ "node": "Notify Success", "type": "main", "index": 0 }],
+        [{ "node": "Alert No Rules", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}

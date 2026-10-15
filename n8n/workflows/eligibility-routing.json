@@ -1,0 +1,90 @@
+{
+  "name": "Policy Maze — Eligibility Routing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eligibility-checked",
+        "responseMode": "onReceived"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.verdict }}",
+              "operation": "equal",
+              "value2": "ELIGIBLE"
+            }
+          ]
+        }
+      },
+      "name": "Is Eligible?",
+      "type": "n8n-nodes-base.if",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "message": "=Auto-approved: {{ $json.scheme_name }} for session {{ $json.session_id }}. Matched {{ $json.matched }}/{{ $json.matched + $json.failed + $json.unknown }} criteria."
+      },
+      "name": "Auto Approve",
+      "type": "n8n-nodes-base.noOp",
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.verdict }}",
+              "operation": "equal",
+              "value2": "PARTIAL"
+            }
+          ]
+        }
+      },
+      "name": "Is Partial?",
+      "type": "n8n-nodes-base.if",
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "message": "=Review needed: {{ $json.scheme_name }} — {{ $json.unknown }} criteria require more data."
+      },
+      "name": "Route to Review",
+      "type": "n8n-nodes-base.noOp",
+      "position": [850, 350]
+    },
+    {
+      "parameters": {
+        "message": "=Rejected: {{ $json.scheme_name }} — {{ $json.failed }} disqualifying criteria."
+      },
+      "name": "Notify Rejection",
+      "type": "n8n-nodes-base.noOp",
+      "position": [850, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Is Eligible?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is Eligible?": {
+      "main": [
+        [{ "node": "Auto Approve", "type": "main", "index": 0 }],
+        [{ "node": "Is Partial?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is Partial?": {
+      "main": [
+        [{ "node": "Route to Review", "type": "main", "index": 0 }],
+        [{ "node": "Notify Rejection", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}

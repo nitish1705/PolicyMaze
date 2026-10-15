@@ -1,0 +1,37 @@
+id: pm-internship
+name: "PM Internship Scheme"
+category: employment
+level: central
+state: null
+ministry: "Ministry of Corporate Affairs"
+description: >
+  A 12-month paid internship in one of India's top 500 companies for
+  youth who are not in full-time work. Interns receive a minimum of
+  Rs 9,000 per month (raised in April 2026) plus a one-time grant of
+  Rs 6,000; final-year students can join with their institution's
+  no-objection certificate.
+benefits:
+  - type: financial
+    summary: "Minimum ₹9,000/month for 12 months + ₹6,000 one-time grant"
+    amount_max: 114000
+eligibility:
+  rules:
+    - field: age
+      op: between
+      value: [18, 25]
+    - field: annual_income
+      op: lte
+      value: 800000
+  self_check:
+    - "You are not in full-time employment; full-time students need a no-objection certificate from their institution (online/distance learners are eligible directly)"
+    - "You have completed at least class 10, and do not hold a degree from IIT/IIM/NLU or a professional qualification like CA/MBBS"
+    - "No family member has a government job or paid income tax in the assessment year"
+required_documents:
+  - "Aadhaar card"
+  - "Education certificates"
+  - "Bank account details"
+application_url: "https://pminternship.mca.gov.in/"
+source_urls:
+  - "https://pminternship.mca.gov.in/"
+last_verified: "2026-06-11"
+tags: [youth, internship, employment]

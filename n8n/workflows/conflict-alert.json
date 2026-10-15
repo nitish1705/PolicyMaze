@@ -1,0 +1,60 @@
+{
+  "name": "Policy Maze — Conflict Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "conflict-detected",
+        "responseMode": "onReceived"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.high_severity_count }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "High Severity?",
+      "type": "n8n-nodes-base.if",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "message": "=URGENT: {{ $json.high_severity_count }} high-severity conflicts detected between {{ $json.document_a }} and {{ $json.document_b }}. Total conflicts: {{ $json.conflict_count }}. Immediate review required."
+      },
+      "name": "Urgent Alert",
+      "type": "n8n-nodes-base.noOp",
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "message": "=Info: {{ $json.conflict_count }} low/medium conflicts detected between {{ $json.document_a }} and {{ $json.document_b }}. Scheduled for routine review."
+      },
+      "name": "Log for Review",
+      "type": "n8n-nodes-base.noOp",
+      "position": [650, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "High Severity?", "type": "main", "index": 0 }]
+      ]
+    },
+    "High Severity?": {
+      "main": [
+        [{ "node": "Urgent Alert", "type": "main", "index": 0 }],
+        [{ "node": "Log for Review", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}
