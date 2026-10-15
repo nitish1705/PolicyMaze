@@ -108,95 +108,110 @@ export default function CheckEligibility() {
             </select>
           </div>
 
-          {profileLoaded && rules.length > 0 && (
+          {profileLoaded && (
             <>
-              {/* Profile coverage status */}
-              <div className="bg-white border border-gov-border rounded-xl p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-5 bg-gov-blue rounded-full" />
-                    <h2 className="text-base font-semibold text-gov-navy">Profile Coverage</h2>
-                  </div>
-                  <div className="text-xs text-gov-navy/60">
-                    {coveredFields.length}/{totalFields} fields available
-                  </div>
-                </div>
-
-                {/* Coverage bar */}
-                <div className="w-full bg-gray-100 rounded-full h-2.5">
-                  <div
-                    className={`h-2.5 rounded-full transition-all ${allFieldsCovered ? 'bg-gov-green' : coveredFields.length > 0 ? 'bg-gov-saffron' : 'bg-gov-maroon'}`}
-                    style={{ width: `${totalFields > 0 ? (coveredFields.length / totalFields) * 100 : 0}%` }}
-                  />
-                </div>
-
-                {/* Covered fields */}
-                {coveredFields.length > 0 && (
+              {rules.length === 0 ? (
+                <div className="bg-gov-saffron/5 border border-gov-saffron/20 rounded-xl p-6 text-center space-y-3">
+                  <AlertCircle size={28} className="mx-auto text-gov-saffron" />
                   <div>
-                    <div className="text-xs font-medium text-gov-green mb-2 flex items-center gap-1">
-                      <CheckCircle size={12} /> Fields from your documents
+                    <p className="text-gov-navy font-medium">No eligibility rules extracted yet</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      This scheme needs AI rule extraction before eligibility can be checked.
+                      Go to the <Link to="/catalog" className="text-gov-blue underline">Scheme Catalog</Link> and click "Check Eligibility" on this scheme to extract rules first.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Profile coverage status */}
+                  <div className="bg-white border border-gov-border rounded-xl p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1 h-5 bg-gov-blue rounded-full" />
+                        <h2 className="text-base font-semibold text-gov-navy">Profile Coverage</h2>
+                      </div>
+                      <div className="text-xs text-gov-navy/60">
+                        {coveredFields.length}/{totalFields} fields available
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {coveredFields.map((f) => (
-                        <div key={f} className="flex items-center gap-1.5 bg-gov-green/5 border border-gov-green/20 rounded-lg px-3 py-1.5">
-                          <CheckCircle size={12} className="text-gov-green" />
-                          <span className="text-xs text-gov-navy capitalize">{f.replace(/_/g, ' ')}</span>
-                          <span className="text-xs text-gov-green font-medium">
-                            {String(citizenProfile[f] ?? '')}
-                          </span>
+
+                    {/* Coverage bar */}
+                    <div className="w-full bg-gray-100 rounded-full h-2.5">
+                      <div
+                        className={`h-2.5 rounded-full transition-all ${allFieldsCovered ? 'bg-gov-green' : coveredFields.length > 0 ? 'bg-gov-saffron' : 'bg-gov-maroon'}`}
+                        style={{ width: `${totalFields > 0 ? (coveredFields.length / totalFields) * 100 : 0}%` }}
+                      />
+                    </div>
+
+                    {/* Covered fields */}
+                    {coveredFields.length > 0 && (
+                      <div>
+                        <div className="text-xs font-medium text-gov-green mb-2 flex items-center gap-1">
+                          <CheckCircle size={12} /> Fields from your documents
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Missing fields → required documents */}
-                {missingFields.length > 0 && (
-                  <div>
-                    <div className="text-xs font-medium text-gov-saffron mb-2 flex items-center gap-1">
-                      <AlertCircle size={12} /> Missing information &mdash; import these documents
-                    </div>
-                    <div className="space-y-2">
-                      {missingDocsNeeded.map((doc) => (
-                        <Link
-                          key={doc.doc_type}
-                          to="/documents"
-                          className="flex items-center gap-3 bg-gov-saffron/5 border border-gov-saffron/20 rounded-lg px-4 py-3 hover:border-gov-gold transition-colors group"
-                        >
-                          <FolderOpen size={18} className="text-gov-saffron" />
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gov-navy">{doc.doc_type}</div>
-                            <div className="text-xs text-gray-500">
-                              Provides: {doc.covers_fields.map((f) => f.replace(/_/g, ' ')).join(', ')}
+                        <div className="flex flex-wrap gap-2">
+                          {coveredFields.map((f) => (
+                            <div key={f} className="flex items-center gap-1.5 bg-gov-green/5 border border-gov-green/20 rounded-lg px-3 py-1.5">
+                              <CheckCircle size={12} className="text-gov-green" />
+                              <span className="text-xs text-gov-navy capitalize">{f.replace(/_/g, ' ')}</span>
+                              <span className="text-xs text-gov-green font-medium">
+                                {String(citizenProfile[f] ?? '')}
+                              </span>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-1 text-gov-gold text-xs font-medium group-hover:gap-2 transition-all">
-                            Import <ArrowRight size={12} />
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Missing fields → required documents */}
+                    {missingFields.length > 0 && (
+                      <div>
+                        <div className="text-xs font-medium text-gov-saffron mb-2 flex items-center gap-1">
+                          <AlertCircle size={12} /> Missing information &mdash; import these documents
+                        </div>
+                        <div className="space-y-2">
+                          {missingDocsNeeded.map((doc) => (
+                            <Link
+                              key={doc.doc_type}
+                              to="/documents"
+                              className="flex items-center gap-3 bg-gov-saffron/5 border border-gov-saffron/20 rounded-lg px-4 py-3 hover:border-gov-gold transition-colors group"
+                            >
+                              <FolderOpen size={18} className="text-gov-saffron" />
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gov-navy">{doc.doc_type}</div>
+                                <div className="text-xs text-gray-500">
+                                  Provides: {doc.covers_fields.map((f) => f.replace(/_/g, ' ')).join(', ')}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 text-gov-gold text-xs font-medium group-hover:gap-2 transition-all">
+                                Import <ArrowRight size={12} />
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Check eligibility button */}
-              <button
-                onClick={handleCheck}
-                disabled={loading || coveredFields.length === 0}
-                className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
-              >
-                {loading ? (
-                  <><Loader2 size={18} className="animate-spin" /> Evaluating...</>
-                ) : (
-                  <><Shield size={18} /> Check Eligibility{!allFieldsCovered && missingFields.length > 0 ? ` (${missingFields.length} fields missing)` : ''}</>
-                )}
-              </button>
+                  {/* Check eligibility button */}
+                  <button
+                    onClick={handleCheck}
+                    disabled={loading || coveredFields.length === 0}
+                    className="w-full bg-gov-navy text-white py-3 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {loading ? (
+                      <><Loader2 size={18} className="animate-spin" /> Evaluating...</>
+                    ) : (
+                      <><Shield size={18} /> Check Eligibility{!allFieldsCovered && missingFields.length > 0 ? ` (${missingFields.length} fields missing)` : ''}</>
+                    )}
+                  </button>
 
-              {!allFieldsCovered && coveredFields.length > 0 && (
-                <p className="text-xs text-gov-navy/50 text-center -mt-4">
-                  You can still check with partial data &mdash; missing fields will show as "insufficient data" in the result.
-                </p>
+                  {!allFieldsCovered && coveredFields.length > 0 && (
+                    <p className="text-xs text-gov-navy/50 text-center -mt-4">
+                      You can still check with partial data &mdash; missing fields will show as "insufficient data" in the result.
+                    </p>
+                  )}
+                </>
               )}
             </>
           )}
