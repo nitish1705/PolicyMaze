@@ -1,5 +1,6 @@
 import { Loader2, Shield } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { checkEligibility } from '../api/client'
 import type { EligibilityCheckResponse, ExtractedRule } from '../types'
 
@@ -46,7 +47,10 @@ function deriveFields(rules: ExtractedRule[]): FieldDef[] {
   return fields
 }
 
+const inputCls = "w-full px-3 py-2 border border-gov-border dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gov-navy dark:text-slate-100 focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
+
 export default function UserProfileForm({ documentId, rules, onResult }: Props) {
+  const { t, i18n } = useTranslation()
   const fields = deriveFields(rules)
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [loading, setLoading] = useState(false)
@@ -64,10 +68,10 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
       for (const [k, v] of Object.entries(values)) {
         if (v !== '' && v !== undefined) profile[k] = v
       }
-      const res = await checkEligibility(documentId, profile)
+      const res = await checkEligibility(documentId, profile, i18n.language)
       onResult(res)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Check failed')
+      setError(e instanceof Error ? e.message : t('profile.checkEligibility'))
     } finally {
       setLoading(false)
     }
@@ -78,7 +82,7 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f) => (
           <div key={f.field}>
-            <label className="block text-sm font-medium text-gov-navy mb-1 capitalize">
+            <label className="block text-sm font-medium text-gov-navy dark:text-slate-200 mb-1 capitalize">
               {f.label}
             </label>
             {f.type === 'boolean' ? (
@@ -88,19 +92,19 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
                   const v = e.target.value
                   set(f.field, v === '' ? undefined : v === 'true')
                 }}
-                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
+                className={inputCls}
               >
-                <option value="">-- Not provided --</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                <option value="">{t('profile.notProvided')}</option>
+                <option value="true">{t('reasoning.yes')}</option>
+                <option value="false">{t('reasoning.no')}</option>
               </select>
             ) : f.type === 'select' && f.options ? (
               <select
                 value={String(values[f.field] ?? '')}
                 onChange={(e) => set(f.field, e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
+                className={inputCls}
               >
-                <option value="">-- Not provided --</option>
+                <option value="">{t('profile.notProvided')}</option>
                 {f.options.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
@@ -110,16 +114,16 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
                 type="number"
                 value={values[f.field] === undefined ? '' : String(values[f.field])}
                 onChange={(e) => set(f.field, e.target.value === '' ? undefined : Number(e.target.value))}
-                placeholder={`Enter ${f.label.toLowerCase()}`}
-                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
+                placeholder={t('profile.enterValue', { label: f.label.toLowerCase() })}
+                className={inputCls}
               />
             ) : (
               <input
                 type="text"
                 value={String(values[f.field] ?? '')}
                 onChange={(e) => set(f.field, e.target.value || undefined)}
-                placeholder={`Enter ${f.label.toLowerCase()}`}
-                className="w-full px-3 py-2 border border-gov-border rounded-lg text-sm bg-white focus:ring-2 focus:ring-gov-blue focus:border-gov-blue outline-none"
+                placeholder={t('profile.enterValue', { label: f.label.toLowerCase() })}
+                className={inputCls}
               />
             )}
           </div>
@@ -140,12 +144,12 @@ export default function UserProfileForm({ documentId, rules, onResult }: Props) 
         {loading ? (
           <>
             <Loader2 size={18} className="animate-spin" />
-            Evaluating...
+            {t('profile.evaluating')}
           </>
         ) : (
           <>
             <Shield size={18} />
-            Check Eligibility
+            {t('profile.checkEligibility')}
           </>
         )}
       </button>

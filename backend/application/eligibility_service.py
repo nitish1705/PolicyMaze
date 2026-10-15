@@ -5,6 +5,8 @@ from typing import Any
 
 import aiosqlite
 
+from backend.adapters.llm_provider import translate_texts
+from backend.adapters.n8n_webhook import notify_eligibility_checked
 from backend.application.session import (
     create_profile,
     create_session,
@@ -102,10 +104,36 @@ def _build_explanation(rule: PolicyRule, user_value: Any, verdict: bool | None) 
     return f"{rule.field_label} {op_text}. Your value: {val_display}. Result: {status}."
 
 
+def _translate_result(result: dict, lang: str) -> dict:
+    """Post-translate human-readable text fields in the eligibility result."""
+    if lang == "en":
+        return result
+
+    texts: list[str] = [result["summary"]]
+    for step in result["reasoning_trace"]:
+        texts.append(step["explanation"])
+    for m in result["missing_information"]:
+        texts.append(m["recommendation"])
+        texts.append(m["impact"])
+
+    translated = translate_texts(texts, lang)
+
+    idx = 0
+    result["summary"] = translated[idx]; idx += 1
+    for step in result["reasoning_trace"]:
+        step["explanation"] = translated[idx]; idx += 1
+    for m in result["missing_information"]:
+        m["recommendation"] = translated[idx]; idx += 1
+        m["impact"] = translated[idx]; idx += 1
+
+    return result
+
+
 async def check_eligibility(
     db: aiosqlite.Connection,
     document_id: str,
     profile_data: dict[str, Any],
+    lang: str = "en",
 ) -> dict:
     """Full eligibility check workflow.
 
@@ -193,7 +221,16 @@ async def check_eligibility(
     )
     await store_bundle(db, bundle)
 
-    return {
+    await notify_eligibility_checked(
+        session_id=session_id,
+        scheme_name=scheme_name,
+        verdict=overall_verdict,
+        matched=len(bundle.matched_criteria),
+        failed=len(bundle.disqualifying_criteria),
+        unknown=len(bundle.missing_information),
+    )
+
+    result = {
         "session_id": session_id,
         "bundle_id": bundle.bundle_id,
         "document_id": document_id,
@@ -214,6 +251,7 @@ async def check_eligibility(
         ],
         "timestamp": bundle.timestamp,
     }
+    return _translate_result(result, lang)
 
 
 async def get_session_trace(

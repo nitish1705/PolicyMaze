@@ -1,10 +1,12 @@
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { Loader2, ShieldCheck, UserPlus } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { auth } from '../firebase'
 
 export default function RegisterPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -18,15 +20,15 @@ export default function RegisterPage() {
     setError('')
 
     if (!name || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields.')
+      setError(t('auth.errors.fillAllFields'))
       return
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.')
+      setError(t('auth.errors.passwordsNoMatch'))
       return
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
+      setError(t('auth.errors.passwordTooShort'))
       return
     }
 
@@ -40,11 +42,11 @@ export default function RegisterPage() {
       localStorage.setItem('user_email', email)
       navigate('/')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Registration failed.'
+      const msg = err instanceof Error ? err.message : t('auth.errors.fillAllFields')
       if (msg.includes('email-already-in-use')) {
-        setError('This email is already registered.')
+        setError(t('auth.errors.emailInUse'))
       } else if (msg.includes('weak-password')) {
-        setError('Password is too weak. Use at least 6 characters.')
+        setError(t('auth.errors.weakPassword'))
       } else {
         setError(msg)
       }
@@ -53,11 +55,13 @@ export default function RegisterPage() {
     }
   }
 
+  const inputCls = "w-full px-3 py-2.5 border border-gov-border dark:border-slate-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white dark:bg-slate-700 text-gov-navy dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+
   return (
-    <div className="min-h-screen bg-gov-cream flex flex-col">
+    <div className="min-h-screen bg-gov-cream dark:bg-slate-900 flex flex-col">
       <div className="flex h-1.5">
         <div className="flex-1 bg-gov-saffron" />
-        <div className="flex-1 bg-white" />
+        <div className="flex-1 bg-white dark:bg-slate-200" />
         <div className="flex-1 bg-gov-green" />
       </div>
 
@@ -65,14 +69,14 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <ShieldCheck size={32} className="text-gov-navy" />
-              <h1 className="text-2xl font-bold text-gov-navy">Policy Maze</h1>
+              <ShieldCheck size={32} className="text-gov-navy dark:text-gov-gold" />
+              <h1 className="text-2xl font-bold text-gov-navy dark:text-slate-100">Policy Maze</h1>
             </div>
-            <p className="text-sm text-gray-500">Government Scheme Eligibility Portal</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">{t('header.subtitle')}</p>
           </div>
 
-          <div className="bg-white border border-gov-border rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gov-navy mb-5">Create Account</h2>
+          <div className="bg-white dark:bg-slate-800 border border-gov-border dark:border-slate-700 rounded-xl p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gov-navy dark:text-slate-100 mb-5">{t('auth.createAccount')}</h2>
 
             {error && (
               <div className="bg-gov-maroon/5 border border-gov-maroon/20 text-gov-maroon text-sm rounded-lg p-3 mb-4">
@@ -82,44 +86,20 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gov-navy/70 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your full name"
-                  className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white"
-                />
+                <label className="block text-sm font-medium text-gov-navy/70 dark:text-slate-300 mb-1">{t('auth.fullName')}</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('auth.fullNamePlaceholder')} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gov-navy/70 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white"
-                />
+                <label className="block text-sm font-medium text-gov-navy/70 dark:text-slate-300 mb-1">{t('auth.email')}</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('auth.emailPlaceholder')} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gov-navy/70 mb-1">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white"
-                />
+                <label className="block text-sm font-medium text-gov-navy/70 dark:text-slate-300 mb-1">{t('auth.password')}</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.passwordHint')} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gov-navy/70 mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your password"
-                  className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white"
-                />
+                <label className="block text-sm font-medium text-gov-navy/70 dark:text-slate-300 mb-1">{t('auth.confirmPassword')}</label>
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder={t('auth.confirmPasswordPlaceholder')} className={inputCls} />
               </div>
               <button
                 type="submit"
@@ -127,13 +107,13 @@ export default function RegisterPage() {
                 className="w-full bg-gov-navy text-white py-2.5 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
-                {loading ? 'Creating account...' : 'Create Account'}
+                {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
               </button>
             </form>
 
-            <div className="mt-5 text-center text-sm text-gray-500">
-              Already have an account?{' '}
-              <Link to="/login" className="text-gov-blue font-medium hover:underline">Sign In</Link>
+            <div className="mt-5 text-center text-sm text-gray-500 dark:text-slate-400">
+              {t('auth.hasAccount')}{' '}
+              <Link to="/login" className="text-gov-blue font-medium hover:underline">{t('auth.signIn')}</Link>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ from typing import Any
 
 import aiosqlite
 
+from backend.adapters.n8n_webhook import notify_conflict_detected
 from backend.domain.conflict import RuleConflict, detect_conflicts
 from backend.domain.policy_diff import RuleDiff, diff_rules
 from backend.domain.rule import PolicyRule
@@ -64,6 +65,10 @@ async def compare_documents(
 
     diffs = diff_rules(rules_a, rules_b)
     conflicts = detect_conflicts(rules_a, rules_b, name_a, name_b)
+
+    if conflicts:
+        high_count = sum(1 for c in conflicts if c.severity == "high")
+        await notify_conflict_detected(name_a, name_b, len(conflicts), high_count)
 
     return {
         "document_a": {"id": doc_id_a, "name": name_a, "rule_count": len(rules_a)},

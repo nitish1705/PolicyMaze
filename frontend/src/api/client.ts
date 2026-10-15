@@ -56,11 +56,12 @@ export async function getDocumentRules(documentId: string): Promise<DocumentRule
 export async function checkEligibility(
   documentId: string,
   profile: Record<string, unknown>,
+  lang = 'en',
 ): Promise<EligibilityCheckResponse> {
   return request<EligibilityCheckResponse>('/eligibility/check', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ document_id: documentId, profile }),
+    body: JSON.stringify({ document_id: documentId, profile, lang }),
   })
 }
 

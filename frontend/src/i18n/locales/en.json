@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "home": "Home",
+    "schemeCatalog": "Scheme Catalog",
+    "checkEligibility": "Check Eligibility",
+    "compareSchemes": "Compare Schemes",
+    "myDocuments": "My Documents",
+    "myAssessments": "My Assessments"
+  },
+  "header": {
+    "subtitle": "Government Scheme Eligibility Portal"
+  },
+  "footer": {
+    "aboutTitle": "About Policy Maze",
+    "aboutText": "An AI-powered platform that parses government policy documents, extracts eligibility rules, and provides traceable, explainable decisions for citizens.",
+    "quickLinks": "Quick Links",
+    "browseSchemes": "Browse 2,100+ Schemes",
+    "checkEligibility": "Check Your Eligibility",
+    "importDocuments": "Import Your Documents",
+    "contactTitle": "Contact Us",
+    "contactText": "For queries and support, contact the helpdesk at support@policymaze.gov.in",
+    "copyright": "2026 Policy Maze — Government Scheme Eligibility Portal"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fullName": "Full Name",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "passwordHint": "At least 6 characters",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "fullNamePlaceholder": "Enter your full name",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "hasAccount": "Already have an account?",
+    "errors": {
+      "fillAllFields": "Please fill in all fields.",
+      "passwordsNoMatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 6 characters.",
+      "emailInUse": "This email is already registered.",
+      "invalidCredential": "Invalid email or password.",
+      "weakPassword": "Password is too weak. Use at least 6 characters."
+    }
+  },
+  "dashboard": {
+    "heroLabel": "National Eligibility Decision Support",
+    "heroTitle": "Know Your Entitlements.",
+    "heroTitle2": "Every Decision Explained.",
+    "heroDesc": "Browse {{count}} government schemes, verify eligibility with AI-powered rule extraction, and receive fully traceable decisions citing exact policy document text.",
+    "browseSchemes": "Browse Schemes",
+    "checkEligibility": "Check Eligibility",
+    "totalSchemes": "Total Schemes",
+    "centralSchemes": "Central Schemes",
+    "stateSchemes": "State Schemes",
+    "citizenServices": "Citizen Services",
+    "schemeCatalogTitle": "Scheme Catalog",
+    "schemeCatalogDesc": "Browse 2,100+ central & state government schemes",
+    "eligibilityCheckTitle": "Eligibility Check",
+    "eligibilityCheckDesc": "Verify your eligibility with traceable AI decisions",
+    "compareSchemesTitle": "Compare Schemes",
+    "compareSchemesDesc": "Multi-scheme check and policy conflict analysis",
+    "myDocumentsTitle": "My Documents",
+    "myDocumentsDesc": "Import personal documents for auto-filled eligibility checks",
+    "howItWorks": "How It Works",
+    "step01Title": "Select a Scheme",
+    "step01Desc": "Browse 2,100+ schemes from the catalog with pre-extracted rules",
+    "step02Title": "Import Documents",
+    "step02Desc": "Upload Aadhaar, income cert, etc. — AI extracts your details",
+    "step03Title": "Auto-Check",
+    "step03Desc": "System maps your documents to scheme requirements automatically",
+    "step04Title": "Traced Verdict",
+    "step04Desc": "Each rule is evaluated against your profile with source citations",
+    "readyForCheck": "Schemes Ready for Eligibility Check",
+    "viewAll": "View All",
+    "schemeName": "Scheme Name",
+    "rules": "Rules",
+    "confidence": "Confidence",
+    "action": "Action",
+    "checkEligibilityLink": "Check Eligibility",
+    "accessService": "Access Service"
+  },
+  "eligibility": {
+    "missingInformation": "Missing Information",
+    "disqualifyingCriteria": "Disqualifying Criteria",
+    "matched": "Matched",
+    "failed": "Failed",
+    "unknown": "Unknown",
+    "total": "Total",
+    "sourcePrefix": "Source:",
+    "verdicts": {
+      "ELIGIBLE": "Eligible",
+      "NOT_ELIGIBLE": "Not Eligible",
+      "PARTIAL": "Partial",
+      "INSUFFICIENT_DATA": "Insufficient Data"
+    }
+  },
+  "reasoning": {
+    "howWeChecked": "How We Checked",
+    "subtitle": "Each eligibility rule was verified against your uploaded documents",
+    "criteriaMet": "{{count}} criteria met",
+    "notMet": "{{count}} not met",
+    "needMoreInfo": "{{count}} need more info",
+    "met": "Met",
+    "notMetLabel": "Not Met",
+    "missingInfo": "Missing Info",
+    "exclusionRule": "Exclusion Rule",
+    "required": "Required",
+    "yourValue": "Your Value",
+    "sourceFromPolicy": "Source from Policy Document",
+    "notProvided": "not provided",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "profile": {
+    "notProvided": "-- Not provided --",
+    "checkEligibility": "Check Eligibility",
+    "evaluating": "Evaluating...",
+    "enterValue": "Enter {{label}}"
+  },
+  "history": {
+    "title": "My Assessments",
+    "subtitle": "Track your eligibility checks and review past decisions",
+    "noAssessments": "No assessments yet",
+    "noAssessmentsDesc": "Check your eligibility for a scheme to see results here.",
+    "browseSchemes": "Browse Schemes",
+    "totalChecks": "Total Checks",
+    "eligible": "Eligible",
+    "notEligible": "Not Eligible",
+    "partial": "Partial",
+    "needMoreData": "Need More Data",
+    "recheck": "Re-check"
+  },
+  "common": {
+    "logout": "Logout",
+    "login": "Login",
+    "loading": "Loading...",
+    "na": "N/A"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "hi": "हिंदी",
+    "ta": "தமிழ்",
+    "te": "తెలుగు",
+    "ml": "മലയാളം"
+  }
+}

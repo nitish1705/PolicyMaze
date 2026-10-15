@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
 from backend.adapters.database import get_db
+from backend.adapters.n8n_webhook import notify_document_ingested
 from backend.adapters.pdf_provider import parse_pdf
 from backend.application.document_service import extract_and_store_rules
 from backend.config import settings
@@ -83,6 +84,8 @@ async def upload_document(
     )
 
     avg_conf = sum(r.confidence for r in rules) / len(rules) if rules else None
+
+    await notify_document_ingested(doc_id, scheme_name, len(rules), avg_conf or 0.0)
 
     return DocumentUploadResponse(
         document_id=doc_id,

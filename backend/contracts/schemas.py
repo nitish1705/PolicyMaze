@@ -68,6 +68,7 @@ class UserProfileData(BaseModel):
 class EligibilityCheckRequest(BaseModel):
     document_id: str
     profile: UserProfileData
+    lang: str = "en"
 
 
 class SourceCitationSchema(BaseModel):

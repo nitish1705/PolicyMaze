@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     upload_dir: str = "data/uploads"
     host: str = "0.0.0.0"
     port: int = 8000
+    n8n_base_url: str = "http://localhost:5678"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

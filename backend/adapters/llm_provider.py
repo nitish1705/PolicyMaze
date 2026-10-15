@@ -77,3 +77,63 @@ def extract_rules_with_llm(
         return parsed
 
     return []
+
+
+_LANG_NAMES: dict[str, str] = {
+    "hi": "Hindi",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "ml": "Malayalam",
+}
+
+
+def translate_texts(texts: list[str], target_lang: str, model: str = "qwen/qwen3.8-27b") -> list[str]:
+    """Translate a batch of texts to the target language. Returns originals on any failure."""
+    if not texts or target_lang == "en" or target_lang not in _LANG_NAMES:
+        return texts
+
+    lang_name = _LANG_NAMES[target_lang]
+    numbered = "\n".join(f"{i + 1}. {text}" for i, text in enumerate(texts))
+    prompt = (
+        f"Translate the following numbered items to {lang_name}. "
+        f'Return ONLY a JSON object with key "translations" containing an array of translated strings in the same order. '
+        f"Keep proper nouns, scheme names, numbers, and technical terms unchanged.\n\n"
+        f"{numbered}"
+    )
+
+    client = _get_client()
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": f"You are a professional translator. Translate accurately to {lang_name}."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.1,
+            max_tokens=4096,
+            response_format={"type": "json_object"},
+        )
+    except Exception:
+        logger.exception("Translation API call failed")
+        return texts
+
+    raw = response.choices[0].message.content or ""
+    raw = _clean_json_response(raw)
+
+    try:
+        parsed = json.loads(raw)
+        result: list | None = None
+        if isinstance(parsed, dict):
+            for key in ("translations", "items", "results"):
+                if key in parsed and isinstance(parsed[key], list):
+                    result = parsed[key]
+                    break
+        elif isinstance(parsed, list):
+            result = parsed
+
+        if result is not None and len(result) == len(texts):
+            return [str(r) for r in result]
+    except (json.JSONDecodeError, Exception):
+        logger.error("Failed to parse translation response")
+
+    return texts

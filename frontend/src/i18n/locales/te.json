@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "home": "హోమ్",
+    "schemeCatalog": "పథకాల జాబితా",
+    "checkEligibility": "అర్హత తనిఖీ",
+    "compareSchemes": "పథకాలు పోల్చు",
+    "myDocuments": "నా పత్రాలు",
+    "myAssessments": "నా మూల్యాంకనాలు"
+  },
+  "header": {
+    "subtitle": "ప్రభుత్వ పథకం అర్హత పోర్టల్"
+  },
+  "footer": {
+    "aboutTitle": "Policy Maze గురించి",
+    "aboutText": "ప్రభుత్వ విధాన పత్రాలను విశ్లేషించి, అర్హత నిబంధనలను సేకరించి, పౌరులకు ట్రేసబుల్, వివరించదగిన నిర్ణయాలు అందించే AI-ఆధారిత వేదిక.",
+    "quickLinks": "త్వరిత లింకులు",
+    "browseSchemes": "2,100+ పథకాలు చూడండి",
+    "checkEligibility": "మీ అర్హత తనిఖీ చేయండి",
+    "importDocuments": "మీ పత్రాలు దిగుమతి చేయండి",
+    "contactTitle": "సంప్రదించండి",
+    "contactText": "సందేహాలు మరియు సహాయానికి, హెల్ప్‌డెస్క్‌ని సంప్రదించండి: support@policymaze.gov.in",
+    "copyright": "2026 Policy Maze — ప్రభుత్వ పథకం అర్హత పోర్టల్"
+  },
+  "auth": {
+    "signIn": "సైన్ ఇన్",
+    "signingIn": "సైన్ ఇన్ అవుతోంది...",
+    "createAccount": "ఖాతా సృష్టించు",
+    "creatingAccount": "ఖాతా సృష్టిస్తోంది...",
+    "email": "ఇమెయిల్",
+    "password": "పాస్‌వర్డ్",
+    "confirmPassword": "పాస్‌వర్డ్ నిర్ధారించు",
+    "fullName": "పూర్తి పేరు",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "మీ పాస్‌వర్డ్ నమోదు చేయండి",
+    "passwordHint": "కనీసం 6 అక్షరాలు",
+    "confirmPasswordPlaceholder": "పాస్‌వర్డ్ నిర్ధారించండి",
+    "fullNamePlaceholder": "మీ పూర్తి పేరు నమోదు చేయండి",
+    "noAccount": "ఖాతా లేదా?",
+    "register": "నమోదు చేయండి",
+    "hasAccount": "ఇప్పటికే ఖాతా ఉందా?",
+    "errors": {
+      "fillAllFields": "దయచేసి అన్ని ఫీల్డ్‌లు పూరించండి.",
+      "passwordsNoMatch": "పాస్‌వర్డ్‌లు సరిపోలలేదు.",
+      "passwordTooShort": "పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి.",
+      "emailInUse": "ఈ ఇమెయిల్ ఇప్పటికే నమోదు చేయబడింది.",
+      "invalidCredential": "తప్పు ఇమెయిల్ లేదా పాస్‌వర్డ్.",
+      "weakPassword": "పాస్‌వర్డ్ చాలా బలహీనంగా ఉంది. కనీసం 6 అక్షరాలు ఉపయోగించండి."
+    }
+  },
+  "dashboard": {
+    "heroLabel": "జాతీయ అర్హత నిర్ణయ మద్దతు",
+    "heroTitle": "మీ హక్కులు తెలుసుకోండి.",
+    "heroTitle2": "ప్రతి నిర్ణయం వివరించబడింది.",
+    "heroDesc": "{{count}} ప్రభుత్వ పథకాలు చూసి, AI-ఆధారిత నిబంధన సేకరణతో అర్హత ధృవీకరించుకోండి.",
+    "browseSchemes": "పథకాలు చూడండి",
+    "checkEligibility": "అర్హత తనిఖీ",
+    "totalSchemes": "మొత్తం పథకాలు",
+    "centralSchemes": "కేంద్ర పథకాలు",
+    "stateSchemes": "రాష్ట్ర పథకాలు",
+    "citizenServices": "పౌర సేవలు",
+    "schemeCatalogTitle": "పథకాల జాబితా",
+    "schemeCatalogDesc": "2,100+ కేంద్ర మరియు రాష్ట్ర ప్రభుత్వ పథకాలు చూడండి",
+    "eligibilityCheckTitle": "అర్హత తనిఖీ",
+    "eligibilityCheckDesc": "ట్రేసబుల్ AI నిర్ణయాలతో మీ అర్హత ధృవీకరించుకోండి",
+    "compareSchemesTitle": "పథకాలు పోల్చు",
+    "compareSchemesDesc": "బహుళ-పథకం తనిఖీ మరియు విధాన వైరుధ్య విశ్లేషణ",
+    "myDocumentsTitle": "నా పత్రాలు",
+    "myDocumentsDesc": "స్వయంచాలక అర్హత తనిఖీలకు వ్యక్తిగత పత్రాలు దిగుమతి చేయండి",
+    "howItWorks": "ఇది ఎలా పనిచేస్తుంది",
+    "step01Title": "పథకం ఎంచుకోండి",
+    "step01Desc": "ముందే సేకరించిన నిబంధనలతో జాబితా నుండి 2,100+ పథకాలు చూడండి",
+    "step02Title": "పత్రాలు దిగుమతి చేయండి",
+    "step02Desc": "ఆధార్, ఆదాయ సర్టిఫికెట్ మొదలైనవి అప్‌లోడ్ చేయండి — AI మీ వివరాలు సేకరిస్తుంది",
+    "step03Title": "స్వయంచాలక తనిఖీ",
+    "step03Desc": "సిస్టమ్ మీ పత్రాలను పథక అవసరాలకు స్వయంచాలకంగా మ్యాప్ చేస్తుంది",
+    "step04Title": "ట్రేస్డ్ తీర్పు",
+    "step04Desc": "ప్రతి నిబంధన మూల ఉల్లేఖనాలతో మీ ప్రొఫైల్‌కు వ్యతిరేకంగా మూల్యాంకనం చేయబడుతుంది",
+    "readyForCheck": "అర్హత తనిఖీకి సిద్ధంగా ఉన్న పథకాలు",
+    "viewAll": "అన్నీ చూడండి",
+    "schemeName": "పథకం పేరు",
+    "rules": "నిబంధనలు",
+    "confidence": "నమ్మకం",
+    "action": "చర్య",
+    "checkEligibilityLink": "అర్హత తనిఖీ",
+    "accessService": "సేవ యాక్సెస్"
+  },
+  "eligibility": {
+    "missingInformation": "లేని సమాచారం",
+    "disqualifyingCriteria": "అర్హత రద్దు ప్రమాణాలు",
+    "matched": "సరిపోలింది",
+    "failed": "విఫలమైంది",
+    "unknown": "తెలియదు",
+    "total": "మొత్తం",
+    "sourcePrefix": "మూలం:",
+    "verdicts": {
+      "ELIGIBLE": "అర్హులు",
+      "NOT_ELIGIBLE": "అనర్హులు",
+      "PARTIAL": "పాక్షిక",
+      "INSUFFICIENT_DATA": "సరిపోను డేటా"
+    }
+  },
+  "reasoning": {
+    "howWeChecked": "మేము ఎలా తనిఖీ చేశాము",
+    "subtitle": "ప్రతి అర్హత నిబంధన మీరు అప్‌లోడ్ చేసిన పత్రాలకు వ్యతిరేకంగా ధృవీకరించబడింది",
+    "criteriaMet": "{{count}} ప్రమాణాలు నెరవేరాయి",
+    "notMet": "{{count}} నెరవేరలేదు",
+    "needMoreInfo": "{{count}} అదనపు సమాచారం అవసరం",
+    "met": "నెరవేరింది",
+    "notMetLabel": "నెరవేరలేదు",
+    "missingInfo": "సమాచారం లేదు",
+    "exclusionRule": "మినహాయింపు నిబంధన",
+    "required": "అవసరం",
+    "yourValue": "మీ విలువ",
+    "sourceFromPolicy": "విధాన పత్రం నుండి మూలం",
+    "notProvided": "అందించలేదు",
+    "yes": "అవును",
+    "no": "కాదు"
+  },
+  "profile": {
+    "notProvided": "-- అందించలేదు --",
+    "checkEligibility": "అర్హత తనిఖీ",
+    "evaluating": "మూల్యాంకనం చేస్తోంది...",
+    "enterValue": "{{label}} నమోదు చేయండి"
+  },
+  "history": {
+    "title": "నా మూల్యాంకనాలు",
+    "subtitle": "మీ అర్హత తనిఖీలను ట్రాక్ చేయండి మరియు గత నిర్ణయాలను సమీక్షించండి",
+    "noAssessments": "ఇంకా మూల్యాంకనాలు లేవు",
+    "noAssessmentsDesc": "ఫలితాలు చూడటానికి పథకం కోసం మీ అర్హతను తనిఖీ చేయండి.",
+    "browseSchemes": "పథకాలు చూడండి",
+    "totalChecks": "మొత్తం తనిఖీలు",
+    "eligible": "అర్హులు",
+    "notEligible": "అనర్హులు",
+    "partial": "పాక్షిక",
+    "needMoreData": "అదనపు డేటా అవసరం",
+    "recheck": "తిరిగి తనిఖీ"
+  },
+  "common": {
+    "logout": "లాగ్ అవుట్",
+    "login": "లాగిన్",
+    "loading": "లోడ్ అవుతోంది...",
+    "na": "N/A"
+  },
+  "language": {
+    "select": "భాష",
+    "en": "English",
+    "hi": "हिंदी",
+    "ta": "தமிழ்",
+    "te": "తెలుగు",
+    "ml": "മലയാളം"
+  }
+}

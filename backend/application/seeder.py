@@ -52,7 +52,7 @@ async def _seed_schemefinder(db: aiosqlite.Connection) -> int:
     count = 0
     for yaml_file in sorted(schemes_dir.glob("*.yaml")):
         try:
-            data = yaml.safe_load(yaml_file.read_text())
+            data = yaml.safe_load(yaml_file.read_text(encoding="utf-8"))
         except Exception:
             logger.warning("Failed to parse %s", yaml_file.name)
             continue
@@ -381,7 +381,7 @@ async def _seed_myscheme_catalog(db: aiosqlite.Connection) -> int:
         logger.warning("myscheme data not found at %s", json_path)
         return 0
 
-    data = json.loads(json_path.read_text())
+    data = json.loads(json_path.read_text(encoding="utf-8"))
     now = datetime.now(timezone.utc).isoformat()
     count = 0
 

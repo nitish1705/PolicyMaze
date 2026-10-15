@@ -23,7 +23,7 @@ async def check(request: EligibilityCheckRequest):
     profile_dict.update(extra)
 
     try:
-        result = await check_eligibility(db, request.document_id, profile_dict)
+        result = await check_eligibility(db, request.document_id, profile_dict, lang=request.lang)
     except ValueError as exc:
         raise HTTPException(
             status_code=404,

@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "home": "होम",
+    "schemeCatalog": "योजना सूची",
+    "checkEligibility": "पात्रता जांचें",
+    "compareSchemes": "योजनाएं तुलना करें",
+    "myDocuments": "मेरे दस्तावेज़",
+    "myAssessments": "मेरे मूल्यांकन"
+  },
+  "header": {
+    "subtitle": "सरकारी योजना पात्रता पोर्टल"
+  },
+  "footer": {
+    "aboutTitle": "Policy Maze के बारे में",
+    "aboutText": "एक AI-संचालित प्लेटफ़ॉर्म जो सरकारी नीति दस्तावेजों का विश्लेषण करता है, पात्रता नियम निकालता है और नागरिकों के लिए ट्रेसेबल, व्याख्यात्मक निर्णय प्रदान करता है।",
+    "quickLinks": "त्वरित लिंक",
+    "browseSchemes": "2,100+ योजनाएं देखें",
+    "checkEligibility": "अपनी पात्रता जांचें",
+    "importDocuments": "अपने दस्तावेज़ आयात करें",
+    "contactTitle": "संपर्क करें",
+    "contactText": "प्रश्नों और सहायता के लिए, हेल्पडेस्क से संपर्क करें: support@policymaze.gov.in",
+    "copyright": "2026 Policy Maze — सरकारी योजना पात्रता पोर्टल"
+  },
+  "auth": {
+    "signIn": "साइन इन करें",
+    "signingIn": "साइन इन हो रहा है...",
+    "createAccount": "खाता बनाएं",
+    "creatingAccount": "खाता बन रहा है...",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "fullName": "पूरा नाम",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "अपना पासवर्ड दर्ज करें",
+    "passwordHint": "कम से कम 6 अक्षर",
+    "confirmPasswordPlaceholder": "पासवर्ड की पुष्टि करें",
+    "fullNamePlaceholder": "अपना पूरा नाम दर्ज करें",
+    "noAccount": "खाता नहीं है?",
+    "register": "पंजीकरण करें",
+    "hasAccount": "पहले से खाता है?",
+    "errors": {
+      "fillAllFields": "कृपया सभी फ़ील्ड भरें।",
+      "passwordsNoMatch": "पासवर्ड मेल नहीं खाते।",
+      "passwordTooShort": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।",
+      "emailInUse": "यह ईमेल पहले से पंजीकृत है।",
+      "invalidCredential": "अमान्य ईमेल या पासवर्ड।",
+      "weakPassword": "पासवर्ड बहुत कमज़ोर है। कम से कम 6 अक्षर उपयोग करें।"
+    }
+  },
+  "dashboard": {
+    "heroLabel": "राष्ट्रीय पात्रता निर्णय समर्थन",
+    "heroTitle": "अपने अधिकार जानें।",
+    "heroTitle2": "हर निर्णय समझाया गया।",
+    "heroDesc": "{{count}} सरकारी योजनाएं देखें, AI-संचालित नियम निष्कर्षण के साथ पात्रता सत्यापित करें, और सटीक नीति दस्तावेज़ पाठ का हवाला देते हुए पूरी तरह से ट्रेसेबल निर्णय प्राप्त करें।",
+    "browseSchemes": "योजनाएं देखें",
+    "checkEligibility": "पात्रता जांचें",
+    "totalSchemes": "कुल योजनाएं",
+    "centralSchemes": "केंद्रीय योजनाएं",
+    "stateSchemes": "राज्य योजनाएं",
+    "citizenServices": "नागरिक सेवाएं",
+    "schemeCatalogTitle": "योजना सूची",
+    "schemeCatalogDesc": "2,100+ केंद्रीय और राज्य सरकारी योजनाएं देखें",
+    "eligibilityCheckTitle": "पात्रता जांच",
+    "eligibilityCheckDesc": "ट्रेसेबल AI निर्णयों के साथ अपनी पात्रता सत्यापित करें",
+    "compareSchemesTitle": "योजनाएं तुलना करें",
+    "compareSchemesDesc": "बहु-योजना जांच और नीति संघर्ष विश्लेषण",
+    "myDocumentsTitle": "मेरे दस्तावेज़",
+    "myDocumentsDesc": "स्वतः भरी गई पात्रता जांच के लिए व्यक्तिगत दस्तावेज़ आयात करें",
+    "howItWorks": "यह कैसे काम करता है",
+    "step01Title": "एक योजना चुनें",
+    "step01Desc": "पूर्व-निकाले गए नियमों के साथ सूची से 2,100+ योजनाएं देखें",
+    "step02Title": "दस्तावेज़ आयात करें",
+    "step02Desc": "आधार, आय प्रमाण पत्र आदि अपलोड करें — AI आपके विवरण निकालता है",
+    "step03Title": "स्वतः-जांच",
+    "step03Desc": "सिस्टम आपके दस्तावेजों को योजना आवश्यकताओं से स्वचालित रूप से मैप करता है",
+    "step04Title": "ट्रेस्ड वर्डिक्ट",
+    "step04Desc": "प्रत्येक नियम का स्रोत उद्धरणों के साथ आपकी प्रोफ़ाइल के विरुद्ध मूल्यांकन किया जाता है",
+    "readyForCheck": "पात्रता जांच के लिए तैयार योजनाएं",
+    "viewAll": "सभी देखें",
+    "schemeName": "योजना का नाम",
+    "rules": "नियम",
+    "confidence": "विश्वसनीयता",
+    "action": "कार्रवाई",
+    "checkEligibilityLink": "पात्रता जांचें",
+    "accessService": "सेवा प्राप्त करें"
+  },
+  "eligibility": {
+    "missingInformation": "अनुपलब्ध जानकारी",
+    "disqualifyingCriteria": "अयोग्यता मानदंड",
+    "matched": "मेल खाया",
+    "failed": "विफल",
+    "unknown": "अज्ञात",
+    "total": "कुल",
+    "sourcePrefix": "स्रोत:",
+    "verdicts": {
+      "ELIGIBLE": "पात्र",
+      "NOT_ELIGIBLE": "अपात्र",
+      "PARTIAL": "आंशिक",
+      "INSUFFICIENT_DATA": "अपर्याप्त डेटा"
+    }
+  },
+  "reasoning": {
+    "howWeChecked": "हमने कैसे जांचा",
+    "subtitle": "प्रत्येक पात्रता नियम आपके अपलोड किए गए दस्तावेजों के विरुद्ध सत्यापित किया गया",
+    "criteriaMet": "{{count}} मानदंड पूरे",
+    "notMet": "{{count}} पूरे नहीं",
+    "needMoreInfo": "{{count}} को अधिक जानकारी चाहिए",
+    "met": "पूरा",
+    "notMetLabel": "पूरा नहीं",
+    "missingInfo": "जानकारी अनुपलब्ध",
+    "exclusionRule": "अपवाद नियम",
+    "required": "आवश्यक",
+    "yourValue": "आपका मूल्य",
+    "sourceFromPolicy": "नीति दस्तावेज़ से स्रोत",
+    "notProvided": "प्रदान नहीं किया",
+    "yes": "हाँ",
+    "no": "नहीं"
+  },
+  "profile": {
+    "notProvided": "-- प्रदान नहीं किया --",
+    "checkEligibility": "पात्रता जांचें",
+    "evaluating": "मूल्यांकन हो रहा है...",
+    "enterValue": "{{label}} दर्ज करें"
+  },
+  "history": {
+    "title": "मेरे मूल्यांकन",
+    "subtitle": "अपनी पात्रता जांचों को ट्रैक करें और पिछले निर्णयों की समीक्षा करें",
+    "noAssessments": "अभी तक कोई मूल्यांकन नहीं",
+    "noAssessmentsDesc": "परिणाम देखने के लिए किसी योजना के लिए अपनी पात्रता जांचें।",
+    "browseSchemes": "योजनाएं देखें",
+    "totalChecks": "कुल जांच",
+    "eligible": "पात्र",
+    "notEligible": "अपात्र",
+    "partial": "आंशिक",
+    "needMoreData": "अधिक डेटा चाहिए",
+    "recheck": "पुनः जांचें"
+  },
+  "common": {
+    "logout": "लॉग आउट",
+    "login": "लॉग इन",
+    "loading": "लोड हो रहा है...",
+    "na": "N/A"
+  },
+  "language": {
+    "select": "भाषा",
+    "en": "English",
+    "hi": "हिंदी",
+    "ta": "தமிழ்",
+    "te": "తెలుగు",
+    "ml": "മലയാളം"
+  }
+}

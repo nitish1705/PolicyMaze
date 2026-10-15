@@ -1,10 +1,12 @@
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Loader2, LogIn, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { auth } from '../firebase'
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -14,7 +16,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!email || !password) { setError('Please fill in all fields.'); return }
+    if (!email || !password) { setError(t('auth.errors.fillAllFields')); return }
 
     setLoading(true)
     try {
@@ -25,9 +27,9 @@ export default function LoginPage() {
       localStorage.setItem('user_email', email)
       navigate('/')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Login failed.'
+      const msg = err instanceof Error ? err.message : t('auth.errors.invalidCredential')
       if (msg.includes('invalid-credential') || msg.includes('wrong-password') || msg.includes('user-not-found')) {
-        setError('Invalid email or password.')
+        setError(t('auth.errors.invalidCredential'))
       } else {
         setError(msg)
       }
@@ -37,10 +39,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gov-cream flex flex-col">
+    <div className="min-h-screen bg-gov-cream dark:bg-slate-900 flex flex-col">
       <div className="flex h-1.5">
         <div className="flex-1 bg-gov-saffron" />
-        <div className="flex-1 bg-white" />
+        <div className="flex-1 bg-white dark:bg-slate-200" />
         <div className="flex-1 bg-gov-green" />
       </div>
 
@@ -48,14 +50,14 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <ShieldCheck size={32} className="text-gov-navy" />
-              <h1 className="text-2xl font-bold text-gov-navy">Policy Maze</h1>
+              <ShieldCheck size={32} className="text-gov-navy dark:text-gov-gold" />
+              <h1 className="text-2xl font-bold text-gov-navy dark:text-slate-100">Policy Maze</h1>
             </div>
-            <p className="text-sm text-gray-500">Government Scheme Eligibility Portal</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">{t('header.subtitle')}</p>
           </div>
 
-          <div className="bg-white border border-gov-border rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gov-navy mb-5">Sign In</h2>
+          <div className="bg-white dark:bg-slate-800 border border-gov-border dark:border-slate-700 rounded-xl p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gov-navy dark:text-slate-100 mb-5">{t('auth.signIn')}</h2>
 
             {error && (
               <div className="bg-gov-maroon/5 border border-gov-maroon/20 text-gov-maroon text-sm rounded-lg p-3 mb-4">
@@ -65,23 +67,23 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gov-navy/70 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gov-navy/70 dark:text-slate-300 mb-1">{t('auth.email')}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white"
+                  placeholder={t('auth.emailPlaceholder')}
+                  className="w-full px-3 py-2.5 border border-gov-border dark:border-slate-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white dark:bg-slate-700 text-gov-navy dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gov-navy/70 mb-1">Password</label>
+                <label className="block text-sm font-medium text-gov-navy/70 dark:text-slate-300 mb-1">{t('auth.password')}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full px-3 py-2.5 border border-gov-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white"
+                  placeholder={t('auth.passwordPlaceholder')}
+                  className="w-full px-3 py-2.5 border border-gov-border dark:border-slate-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-gov-blue focus:border-gov-blue bg-white dark:bg-slate-700 text-gov-navy dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <button
@@ -90,13 +92,13 @@ export default function LoginPage() {
                 className="w-full bg-gov-navy text-white py-2.5 rounded-lg font-medium hover:bg-gov-navy-light disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? t('auth.signingIn') : t('auth.signIn')}
               </button>
             </form>
 
-            <div className="mt-5 text-center text-sm text-gray-500">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-gov-blue font-medium hover:underline">Register</Link>
+            <div className="mt-5 text-center text-sm text-gray-500 dark:text-slate-400">
+              {t('auth.noAccount')}{' '}
+              <Link to="/register" className="text-gov-blue font-medium hover:underline">{t('auth.register')}</Link>
             </div>
           </div>
         </div>

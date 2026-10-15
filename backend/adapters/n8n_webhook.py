@@ -8,7 +8,9 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-N8N_BASE_URL = "http://localhost:5678"
+from backend.config import settings
+
+N8N_BASE_URL = settings.n8n_base_url
 
 
 async def trigger_webhook(
