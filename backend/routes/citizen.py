@@ -316,14 +316,8 @@ async def get_required_documents(document_id: str, request: Request, user: dict 
     uploaded_docs = await doc_rows.fetchall()
     uploaded_types = {row["doc_type"] for row in uploaded_docs}
 
-    profile_data: dict = {}
-    for row in uploaded_docs:
-        fields = row["extracted_fields"]
-        if isinstance(fields, str):
-            fields = json.loads(fields)
-        for k, v in fields.items():
-            if v is not None and v != "":
-                profile_data[k] = v
+    raw_docs = [{"extracted_fields": row["extracted_fields"]} for row in uploaded_docs]
+    profile_data = _aggregate_profile(raw_docs)
 
     covered_fields = [f for f in fields_needed if f in profile_data]
     missing_fields = [f for f in fields_needed if f not in profile_data]
