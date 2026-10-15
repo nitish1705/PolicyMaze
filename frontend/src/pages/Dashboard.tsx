@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, FolderOpen, GitCompare, ScrollText, Shield, Users } from 'lucide-react'
+import { ArrowRight, BookOpen, FolderOpen, GitCompare, Landmark, MapPin, Shield, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSchemes } from '../api/client'
@@ -6,7 +6,8 @@ import type { SchemeListItem } from '../types'
 
 interface CatalogStats {
   total: number
-  with_rules: number
+  central: number
+  state: number
 }
 
 export default function Dashboard() {
@@ -17,11 +18,15 @@ export default function Dashboard() {
     getSchemes().then((r) => setSchemes(r.schemes)).catch(() => {})
     fetch('/api/catalog?per_page=1')
       .then((r) => r.json())
-      .then((data) => setCatalogStats({ total: data.total, with_rules: 0 }))
+      .then((data) => setCatalogStats({ total: data.total, central: 0, state: 0 }))
       .catch(() => {})
-    fetch('/api/catalog?per_page=1&has_rules=true')
+    fetch('/api/catalog?per_page=1&search=Central')
       .then((r) => r.json())
-      .then((data) => setCatalogStats((prev) => prev ? { ...prev, with_rules: data.total } : null))
+      .then((data) => setCatalogStats((prev) => prev ? { ...prev, central: data.total } : null))
+      .catch(() => {})
+    fetch('/api/catalog?per_page=1&search=State')
+      .then((r) => r.json())
+      .then((data) => setCatalogStats((prev) => prev ? { ...prev, state: data.total } : null))
       .catch(() => {})
   }, [])
 
@@ -66,8 +71,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-4 gap-4">
           {[
             { label: 'Total Schemes', value: catalogStats.total.toLocaleString(), icon: BookOpen, accent: 'border-gov-saffron bg-gov-saffron/5' },
-            { label: 'Rules Extracted', value: String(catalogStats.with_rules), icon: ScrollText, accent: 'border-gov-green bg-gov-green/5' },
-            { label: 'Ready to Check', value: String(schemes.length), icon: Shield, accent: 'border-gov-blue bg-gov-blue/5' },
+            { label: 'Central Schemes', value: catalogStats.central.toLocaleString(), icon: Landmark, accent: 'border-gov-green bg-gov-green/5' },
+            { label: 'State Schemes', value: catalogStats.state.toLocaleString(), icon: MapPin, accent: 'border-gov-blue bg-gov-blue/5' },
             { label: 'Data Sources', value: '3', icon: Users, accent: 'border-gov-maroon bg-gov-maroon/5' },
           ].map((s) => (
             <div key={s.label} className={`border-l-4 ${s.accent} bg-white rounded-r-lg p-4 shadow-sm`}>

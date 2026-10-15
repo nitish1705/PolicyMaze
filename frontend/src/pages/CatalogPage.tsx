@@ -1,4 +1,4 @@
-import { BookOpen, ChevronLeft, ChevronRight, Loader2, Search, Shield, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2, Search, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -51,7 +51,11 @@ export default function CatalogPage() {
       .finally(() => setLoading(false))
   }, [debouncedSearch, page])
 
-  const handleExtract = async (scheme: CatalogScheme) => {
+  const handleCheckEligibility = async (scheme: CatalogScheme) => {
+    if (scheme.has_structured_rules && scheme.document_id) {
+      navigate(`/check?doc=${scheme.document_id}`)
+      return
+    }
     setExtracting(scheme.id)
     try {
       const res = await fetch(`/api/catalog/${scheme.id}/extract`, { method: 'POST' })
@@ -60,7 +64,7 @@ export default function CatalogPage() {
         navigate(`/check?doc=${body.document_id}`)
       }
     } catch {
-      alert('Extraction failed')
+      alert('Rule extraction failed. Please try again.')
     } finally {
       setExtracting(null)
     }
@@ -90,12 +94,8 @@ export default function CatalogPage() {
       </div>
 
       {data && (
-        <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="text-sm text-gray-500">
           <span>{data.total} schemes found</span>
-          <span>
-            {data.schemes.filter((s) => s.has_structured_rules).length > 0 &&
-              `${data.schemes.filter((s) => s.has_structured_rules).length} on this page with rules ready`}
-          </span>
         </div>
       )}
 
@@ -114,11 +114,6 @@ export default function CatalogPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-medium text-gov-navy text-sm">{scheme.name}</h3>
-                    {scheme.has_structured_rules && (
-                      <span className="inline-flex items-center gap-1 bg-gov-green/10 text-gov-green px-2 py-0.5 rounded-full text-xs font-medium">
-                        <Shield size={10} /> Rules Ready
-                      </span>
-                    )}
                     {scheme.level && (
                       <span className="text-xs bg-gov-navy/5 text-gov-navy/70 px-2 py-0.5 rounded">
                         {scheme.level.includes('Central') ? 'Central' : scheme.level.includes('State') ? 'State' : scheme.level}
@@ -138,26 +133,17 @@ export default function CatalogPage() {
                 </div>
 
                 <div className="shrink-0">
-                  {scheme.has_structured_rules && scheme.document_id ? (
-                    <button
-                      onClick={() => navigate(`/check?doc=${scheme.document_id}`)}
-                      className="flex items-center gap-1.5 bg-gov-navy text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-gov-navy-light transition-colors"
-                    >
-                      <Shield size={14} /> Check Eligibility
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleExtract(scheme)}
-                      disabled={extracting === scheme.id}
-                      className="flex items-center gap-1.5 bg-gov-gold text-gov-navy px-3 py-2 rounded-lg text-xs font-medium hover:bg-gov-gold/80 disabled:opacity-50 transition-colors"
-                    >
-                      {extracting === scheme.id ? (
-                        <><Loader2 size={14} className="animate-spin" /> Extracting...</>
-                      ) : (
-                        <><Sparkles size={14} /> AI Extract</>
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleCheckEligibility(scheme)}
+                    disabled={extracting === scheme.id}
+                    className="flex items-center gap-1.5 bg-gov-navy text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-gov-navy-light disabled:opacity-50 transition-colors"
+                  >
+                    {extracting === scheme.id ? (
+                      <><Loader2 size={14} className="animate-spin" /> Preparing...</>
+                    ) : (
+                      <><Shield size={14} /> Check Eligibility</>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
