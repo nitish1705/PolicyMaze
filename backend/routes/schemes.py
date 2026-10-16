@@ -17,6 +17,7 @@ async def list_schemes():
            FROM documents d
            LEFT JOIN rules r ON r.document_id = d.id
            GROUP BY d.id
+           HAVING rule_count > 0
            ORDER BY d.upload_timestamp DESC""",
     )
     rows = await cursor.fetchall()

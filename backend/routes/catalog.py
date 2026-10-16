@@ -144,7 +144,12 @@ async def extract_rules_from_catalog(catalog_id: str):
         raise HTTPException(status_code=404, detail="Scheme not found")
 
     if row["has_structured_rules"] and row["document_id"]:
-        return {"status": "already_extracted", "document_id": row["document_id"]}
+        rule_count = await db.execute(
+            "SELECT COUNT(*) FROM rules WHERE document_id = ?", (row["document_id"],)
+        )
+        count = (await rule_count.fetchone())[0]
+        if count > 0:
+            return {"status": "already_extracted", "document_id": row["document_id"]}
 
     elig_text = row["eligibility_text"] or ""
     exclusions = row["exclusions_text"] or ""
@@ -200,10 +205,11 @@ async def extract_rules_from_catalog(catalog_id: str):
         "UPDATE documents SET extraction_confidence = ? WHERE id = ?",
         (avg_conf, doc_id),
     )
-    await db.execute(
-        "UPDATE scheme_catalog SET has_structured_rules = 1, document_id = ? WHERE id = ?",
-        (doc_id, catalog_id),
-    )
+    if merged:
+        await db.execute(
+            "UPDATE scheme_catalog SET has_structured_rules = 1, document_id = ? WHERE id = ?",
+            (doc_id, catalog_id),
+        )
     await db.commit()
 
     return {
