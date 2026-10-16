@@ -49,7 +49,7 @@ export default function Dashboard() {
             <span className="text-gov-gold">{t('dashboard.heroTitle2')}</span>
           </h1>
           <p className="text-gray-300 mt-3 max-w-xl text-sm leading-relaxed">
-            {t('dashboard.heroDesc', { count: catalogStats ? catalogStats.total.toLocaleString() : '2,000+' })}
+            {t('dashboard.heroDesc', { count: catalogStats ? catalogStats.total : 2000 })}
           </p>
           <div className="flex gap-3 mt-6">
             <Link
