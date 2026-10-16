@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from pydantic import BaseModel
 
 from backend.adapters.database import get_db
+from backend.adapters.n8n_webhook import notify_citizen_document_uploaded
 from backend.routes.auth import get_optional_user
 from backend.adapters.llm_provider import _get_client, _clean_json_response
 from backend.adapters.pdf_provider import parse_pdf
@@ -180,6 +181,8 @@ async def upload_citizen_document(
         (doc_id, user_id, doc_type, file.filename, text[:5000], json.dumps(extracted), now),
     )
     await db.commit()
+
+    await notify_citizen_document_uploaded(doc_id, doc_type, len(extracted), user_id)
 
     return CitizenDocument(
         id=doc_id,

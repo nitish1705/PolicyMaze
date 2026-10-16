@@ -72,11 +72,11 @@ export default function Dashboard() {
       {catalogStats && (
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: t('dashboard.totalSchemes'), value: catalogStats.total.toLocaleString(), icon: BookOpen, accent: 'border-gov-saffron bg-gov-saffron/5 dark:bg-gov-saffron/10' },
-            { label: t('dashboard.centralSchemes'), value: catalogStats.central.toLocaleString(), icon: Landmark, accent: 'border-gov-green bg-gov-green/5 dark:bg-gov-green/10' },
-            { label: t('dashboard.stateSchemes'), value: catalogStats.state.toLocaleString(), icon: MapPin, accent: 'border-gov-blue bg-gov-blue/5 dark:bg-gov-blue/10' },
+            { label: t('dashboard.totalSchemes'), value: catalogStats.total.toLocaleString(), icon: BookOpen },
+            { label: t('dashboard.centralSchemes'), value: catalogStats.central.toLocaleString(), icon: Landmark },
+            { label: t('dashboard.stateSchemes'), value: catalogStats.state.toLocaleString(), icon: MapPin },
           ].map((s) => (
-            <div key={s.label} className={`border-l-4 ${s.accent} bg-white dark:bg-slate-800 rounded-r-lg p-4 shadow-sm`}>
+            <div key={s.label} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gov-navy dark:text-slate-100">{s.value}</div>
@@ -92,7 +92,7 @@ export default function Dashboard() {
       {/* Personalised recommendations */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-1 h-6 bg-gov-maroon rounded-full" />
+          <div className="w-1 h-6 bg-gov-navy rounded-full" />
           <h2 className="text-lg font-bold text-gov-navy dark:text-slate-100 flex items-center gap-2">
             Recommended for You
             <Sparkles size={16} className="text-gov-gold" />
@@ -118,7 +118,7 @@ export default function Dashboard() {
       {/* How it works */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gov-border dark:border-slate-700 p-6">
         <div className="flex items-center gap-2 mb-5">
-          <div className="w-1 h-6 bg-gov-green rounded-full" />
+          <div className="w-1 h-6 bg-gov-navy rounded-full" />
           <h2 className="text-lg font-bold text-gov-navy dark:text-slate-100">{t('dashboard.howItWorks')}</h2>
         </div>
         <div className="grid grid-cols-4 gap-6">
@@ -147,7 +147,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-1 h-6 bg-gov-saffron rounded-full" />
+              <div className="w-1 h-6 bg-gov-navy rounded-full" />
               <h2 className="text-lg font-bold text-gov-navy dark:text-slate-100">{t('dashboard.readyForCheck')}</h2>
             </div>
             <Link to="/catalog" className="text-gov-blue text-sm font-medium flex items-center gap-1 hover:underline">
@@ -169,11 +169,11 @@ export default function Dashboard() {
                   <tr key={s.document_id} className="border-b border-gray-100 dark:border-slate-700 hover:bg-gov-gold/5 dark:hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3 font-medium text-gov-navy dark:text-slate-100">{s.scheme_name}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className="bg-gov-blue/10 text-gov-blue px-2 py-0.5 rounded text-xs font-medium">{s.rule_count}</span>
+                      <span className="bg-gray-100 dark:bg-slate-700 text-gov-navy dark:text-slate-300 px-2 py-0.5 rounded text-xs font-medium">{s.rule_count}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       {s.extraction_confidence ? (
-                        <span className={`text-xs font-medium ${s.extraction_confidence >= 0.9 ? 'text-gov-green' : 'text-gov-saffron'}`}>
+                        <span className={`text-xs font-medium ${s.extraction_confidence >= 0.9 ? 'text-gov-navy dark:text-slate-200' : 'text-gray-500 dark:text-slate-400'}`}>
                           {(s.extraction_confidence * 100).toFixed(0)}%
                         </span>
                       ) : (

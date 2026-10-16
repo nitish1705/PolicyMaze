@@ -99,7 +99,7 @@ export default function CatalogPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-1 h-6 bg-gov-saffron rounded-full" />
+          <div className="w-1 h-6 bg-gov-navy rounded-full" />
           <h1 className="text-xl font-bold text-gov-navy dark:text-slate-100">Scheme Catalog</h1>
         </div>
         <p className="text-gray-500 dark:text-slate-400 text-sm ml-3">
@@ -113,7 +113,7 @@ export default function CatalogPage() {
           <Filter size={16} className="text-gov-navy dark:text-slate-300" />
           <span className="text-sm font-medium text-gov-navy dark:text-slate-200">Filter Schemes</span>
           {hasFilters && (
-            <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-gov-maroon hover:text-gov-maroon/80 transition-colors">
+            <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-gray-500 hover:text-gov-navy dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
               <X size={12} /> Clear Filters
             </button>
           )}
@@ -184,7 +184,7 @@ export default function CatalogPage() {
                   {scheme.tags && (
                     <div className="flex gap-1.5 mt-2 flex-wrap">
                       {parseTags(scheme.tags).slice(0, 4).map((tag) => (
-                        <span key={tag} className="text-xs bg-gov-blue/10 text-gov-blue px-2 py-0.5 rounded-full capitalize">
+                        <span key={tag} className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400 px-2 py-0.5 rounded-full capitalize">
                           {tag.replace(/_/g, ' ')}
                         </span>
                       ))}

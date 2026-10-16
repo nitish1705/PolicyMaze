@@ -22,20 +22,21 @@ function formatTime(ts: string) {
   }
 }
 
+const verdictConfig: Record<string, { icon: typeof CheckCircle; color: string; label: string; dot: string }> = {
+  ELIGIBLE: { icon: CheckCircle, color: 'text-emerald-700 dark:text-emerald-400', label: 'Eligible', dot: 'bg-emerald-500' },
+  NOT_ELIGIBLE: { icon: XCircle, color: 'text-red-700 dark:text-red-400', label: 'Not Eligible', dot: 'bg-red-500' },
+  PARTIAL: { icon: AlertCircle, color: 'text-amber-700 dark:text-amber-400', label: 'Partial', dot: 'bg-amber-500' },
+  INSUFFICIENT_DATA: { icon: HelpCircle, color: 'text-slate-500 dark:text-slate-400', label: 'Need More Data', dot: 'bg-slate-400' },
+}
+
 export default function AssessmentHistory() {
   const { t } = useTranslation()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [loading, setLoading] = useState(true)
 
-  const verdictConfig: Record<string, { icon: typeof CheckCircle; color: string; bg: string; border: string; label: string }> = {
-    ELIGIBLE: { icon: CheckCircle, color: 'text-gov-green', bg: 'bg-gov-green/5 dark:bg-gov-green/10', border: 'border-gov-green/20', label: t('history.eligible') },
-    NOT_ELIGIBLE: { icon: XCircle, color: 'text-gov-maroon', bg: 'bg-gov-maroon/5 dark:bg-gov-maroon/10', border: 'border-gov-maroon/20', label: t('history.notEligible') },
-    PARTIAL: { icon: AlertCircle, color: 'text-gov-saffron', bg: 'bg-gov-saffron/5 dark:bg-gov-saffron/10', border: 'border-gov-saffron/20', label: t('history.partial') },
-    INSUFFICIENT_DATA: { icon: HelpCircle, color: 'text-gov-blue', bg: 'bg-gov-blue/5 dark:bg-gov-blue/10', border: 'border-gov-blue/20', label: t('eligibility.verdicts.INSUFFICIENT_DATA') },
-  }
-
   useEffect(() => {
-    fetch('/api/eligibility/history')
+    const base = import.meta.env.VITE_API_URL || '/api'
+    fetch(`${base}/eligibility/history`)
       .then((r) => r.json())
       .then((data) => setAssessments(data.assessments || []))
       .catch(() => {})
@@ -65,12 +66,10 @@ export default function AssessmentHistory() {
           <Loader2 size={24} className="animate-spin text-gov-navy dark:text-gov-gold" />
         </div>
       ) : assessments.length === 0 ? (
-        <div className="bg-white dark:bg-slate-800 border border-gov-border dark:border-slate-700 rounded-xl p-10 text-center">
-          <Clock size={40} className="mx-auto text-gov-navy/20 dark:text-slate-600 mb-3" />
+        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-10 text-center">
+          <Clock size={40} className="mx-auto text-gray-300 dark:text-slate-600 mb-3" />
           <p className="text-gov-navy dark:text-slate-100 font-medium">{t('history.noAssessments')}</p>
-          <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
-            {t('history.noAssessmentsDesc')}
-          </p>
+          <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">{t('history.noAssessmentsDesc')}</p>
           <Link
             to="/catalog"
             className="inline-block mt-4 bg-gov-navy text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gov-navy-light transition-colors"
@@ -83,44 +82,50 @@ export default function AssessmentHistory() {
           {/* Summary stats */}
           <div className="grid grid-cols-5 gap-3">
             {[
-              { label: t('history.totalChecks'), value: stats.total, color: 'border-gov-navy bg-gov-navy/5 dark:bg-gov-navy/20', text: 'text-gov-navy dark:text-slate-100' },
-              { label: t('history.eligible'), value: stats.eligible, color: 'border-gov-green bg-gov-green/5 dark:bg-gov-green/10', text: 'text-gov-green' },
-              { label: t('history.notEligible'), value: stats.not_eligible, color: 'border-gov-maroon bg-gov-maroon/5 dark:bg-gov-maroon/10', text: 'text-gov-maroon' },
-              { label: t('history.partial'), value: stats.partial, color: 'border-gov-saffron bg-gov-saffron/5 dark:bg-gov-saffron/10', text: 'text-gov-saffron' },
-              { label: t('history.needMoreData'), value: stats.insufficient, color: 'border-gov-blue bg-gov-blue/5 dark:bg-gov-blue/10', text: 'text-gov-blue' },
+              { label: t('history.totalChecks'), value: stats.total, dot: 'bg-gov-navy' },
+              { label: t('history.eligible'), value: stats.eligible, dot: 'bg-emerald-500' },
+              { label: t('history.notEligible'), value: stats.not_eligible, dot: 'bg-red-500' },
+              { label: t('history.partial'), value: stats.partial, dot: 'bg-amber-500' },
+              { label: t('history.needMoreData'), value: stats.insufficient, dot: 'bg-slate-400' },
             ].map((s) => (
-              <div key={s.label} className={`border-l-4 ${s.color} rounded-r-lg p-3`}>
-                <div className={`text-xl font-bold ${s.text}`}>{s.value}</div>
-                <div className="text-xs text-gray-500 dark:text-slate-400">{s.label}</div>
+              <div key={s.label} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${s.dot}`} />
+                  <span className="text-xl font-bold text-gov-navy dark:text-slate-100">{s.value}</span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">{s.label}</div>
               </div>
             ))}
           </div>
 
           {/* Assessment list */}
-          <div className="space-y-2">
-            {assessments.map((a) => {
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+            {assessments.map((a, idx) => {
               const cfg = verdictConfig[a.overall_verdict] || verdictConfig.INSUFFICIENT_DATA
               const Icon = cfg.icon
               return (
                 <div
                   key={a.bundle_id}
-                  className={`${cfg.bg} border ${cfg.border} rounded-lg p-4 flex items-center gap-4`}
+                  className={`flex items-center gap-4 px-5 py-4 ${idx !== assessments.length - 1 ? 'border-b border-gray-100 dark:border-slate-700' : ''} hover:bg-gray-50 dark:hover:bg-slate-750 transition-colors`}
                 >
-                  <Icon size={24} className={cfg.color} />
+                  <div className={`w-8 h-8 rounded-full bg-gray-50 dark:bg-slate-700 flex items-center justify-center shrink-0`}>
+                    <Icon size={16} className={cfg.color} />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gov-navy dark:text-slate-100 text-sm">{a.scheme_name}</span>
-                      <span className={`text-xs font-bold ${cfg.color} px-2 py-0.5 rounded-full bg-white/60 dark:bg-black/20`}>
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium ${cfg.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                         {cfg.label}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-slate-400 mt-0.5 truncate">{a.summary}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 truncate">{a.summary}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-xs text-gov-navy/50 dark:text-slate-500">{formatTime(a.timestamp)}</div>
+                    <div className="text-xs text-gray-400 dark:text-slate-500">{formatTime(a.timestamp)}</div>
                     <Link
                       to={`/check?doc=${a.document_id}`}
-                      className="text-xs text-gov-blue font-medium hover:underline mt-1 inline-block"
+                      className="text-xs text-gov-navy dark:text-gov-gold font-medium hover:underline mt-1 inline-block"
                     >
                       {t('history.recheck')}
                     </Link>

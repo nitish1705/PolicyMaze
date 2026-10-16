@@ -108,7 +108,7 @@ export default function SchemeDetailPage() {
         <ArrowLeft size={16} /> Back to Scheme Catalog
       </Link>
 
-      <div className="bg-white border border-gov-border rounded-xl p-6">
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <h1 className="text-xl font-bold text-gov-navy">{scheme.name}</h1>
@@ -119,17 +119,17 @@ export default function SchemeDetailPage() {
                 </span>
               )}
               {scheme.state && (
-                <span className="text-xs bg-gov-saffron/10 text-gov-saffron px-2.5 py-1 rounded-full font-medium">
+                <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400 px-2.5 py-1 rounded-full font-medium">
                   {scheme.state}
                 </span>
               )}
               {scheme.category && (
-                <span className="text-xs bg-gov-blue/10 text-gov-blue px-2.5 py-1 rounded-full font-medium capitalize">
+                <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400 px-2.5 py-1 rounded-full font-medium capitalize">
                   {scheme.category.replace(/_/g, ' ')}
                 </span>
               )}
               {scheme.ministry && (
-                <span className="text-xs bg-gov-gold/10 text-gov-gold px-2.5 py-1 rounded-full font-medium">
+                <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400 px-2.5 py-1 rounded-full font-medium">
                   {scheme.ministry}
                 </span>
               )}
@@ -159,10 +159,10 @@ export default function SchemeDetailPage() {
       </div>
 
       {description && (
-        <div className="bg-white border border-gov-border rounded-xl p-6">
+        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-5 bg-gov-blue rounded-full" />
-            <h2 className="text-base font-semibold text-gov-navy">About This Scheme</h2>
+            <div className="w-1 h-5 bg-gov-navy rounded-full" />
+            <h2 className="text-base font-semibold text-gov-navy dark:text-slate-100">About This Scheme</h2>
           </div>
           <p className="text-sm text-gray-700 leading-relaxed">{description}</p>
         </div>
@@ -170,15 +170,15 @@ export default function SchemeDetailPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {eligibilityItems.length > 0 && (
-          <div className="bg-white border border-gov-border rounded-xl p-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-1 h-5 bg-gov-green rounded-full" />
-              <h2 className="text-base font-semibold text-gov-navy">Eligibility Criteria</h2>
+              <div className="w-1 h-5 bg-gov-navy rounded-full" />
+              <h2 className="text-base font-semibold text-gov-navy dark:text-slate-100">Eligibility Criteria</h2>
             </div>
             <ul className="space-y-2">
               {eligibilityItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <CheckCircle size={14} className="text-gov-green mt-0.5 shrink-0" />
+                  <CheckCircle size={14} className="text-gray-400 dark:text-slate-500 mt-0.5 shrink-0" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -187,25 +187,25 @@ export default function SchemeDetailPage() {
         )}
 
         {scheme.benefits && (
-          <div className="bg-white border border-gov-border rounded-xl p-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-1 h-5 bg-gov-gold rounded-full" />
-              <h2 className="text-base font-semibold text-gov-navy">Benefits</h2>
+              <div className="w-1 h-5 bg-gov-navy rounded-full" />
+              <h2 className="text-base font-semibold text-gov-navy dark:text-slate-100">Benefits</h2>
             </div>
             <p className="text-sm text-gray-700 leading-relaxed">{scheme.benefits}</p>
           </div>
         )}
 
         {exclusionItems.length > 0 && (
-          <div className="bg-white border border-gov-border rounded-xl p-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-1 h-5 bg-gov-maroon rounded-full" />
-              <h2 className="text-base font-semibold text-gov-navy">Exclusions</h2>
+              <div className="w-1 h-5 bg-gov-navy rounded-full" />
+              <h2 className="text-base font-semibold text-gov-navy dark:text-slate-100">Exclusions</h2>
             </div>
             <ul className="space-y-2">
               {exclusionItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <span className="text-gov-maroon mt-0.5 shrink-0">×</span>
+                  <span className="text-gray-400 dark:text-slate-500 mt-0.5 shrink-0">×</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -214,15 +214,15 @@ export default function SchemeDetailPage() {
         )}
 
         {documentItems.length > 0 && (
-          <div className="bg-white border border-gov-border rounded-xl p-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-1 h-5 bg-gov-saffron rounded-full" />
-              <h2 className="text-base font-semibold text-gov-navy">Documents Required</h2>
+              <div className="w-1 h-5 bg-gov-navy rounded-full" />
+              <h2 className="text-base font-semibold text-gov-navy dark:text-slate-100">Documents Required</h2>
             </div>
             <ul className="space-y-2">
               {documentItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <FileText size={14} className="text-gov-saffron mt-0.5 shrink-0" />
+                  <FileText size={14} className="text-gray-400 dark:text-slate-500 mt-0.5 shrink-0" />
                   <span>{item}</span>
                 </li>
               ))}

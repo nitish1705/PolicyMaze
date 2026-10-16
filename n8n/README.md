@@ -1,6 +1,6 @@
 # n8n Automation — Policy Maze
 
-Policy Maze fires three webhooks into n8n for post-processing: document ingestion alerts, eligibility routing, and conflict detection.
+Policy Maze fires three webhooks into n8n for post-processing: citizen document upload alerts, eligibility routing, and conflict detection.
 
 ---
 
@@ -48,9 +48,9 @@ Open **http://localhost:5678** once it starts.
 
 | File | Purpose |
 |---|---|
-| `document-ingestion.json` | Fires when a policy PDF is uploaded and rules are extracted |
+| `document-ingestion.json` | Fires when a citizen uploads a personal document (Aadhaar, PAN, etc.) and fields are extracted via OCR + AI |
 | `eligibility-routing.json` | Fires after every eligibility check with the verdict |
-| `conflict-alert.json` | Fires when two policies have conflicting rules |
+| `conflict-alert.json` | Fires when two scheme policies have conflicting rules |
 
 4. After importing each workflow, click **Activate** (toggle in top-right)
 
@@ -62,7 +62,7 @@ n8n generates webhook URLs automatically when you activate a workflow. By defaul
 
 | Workflow | URL |
 |---|---|
-| Document ingested | `http://localhost:5678/webhook/document-ingested` |
+| Citizen document uploaded | `http://localhost:5678/webhook/citizen-document-uploaded` |
 | Eligibility checked | `http://localhost:5678/webhook/eligibility-checked` |
 | Conflict detected | `http://localhost:5678/webhook/conflict-detected` |
 
@@ -78,22 +78,24 @@ N8N_BASE_URL=http://your-n8n-host:5678
 
 ## Payload Reference
 
-### `document-ingested`
+### `citizen-document-uploaded`
 ```json
 {
-  "document_id": "abc123",
-  "scheme_name": "PM Kisan Samman Nidhi",
-  "rule_count": 7,
-  "confidence": 0.94
+  "event": "citizen_document_uploaded",
+  "document_id": "cdoc_abc123",
+  "doc_type": "Aadhaar Card",
+  "fields_extracted": 5,
+  "user_id": "user_xyz"
 }
 ```
-Workflow branches: `rule_count > 0` → Notify Success, else → Alert No Rules
+Workflow branches: `fields_extracted > 0` → Notify Success, else → Alert Extraction Failed
 
 ---
 
 ### `eligibility-checked`
 ```json
 {
+  "event": "eligibility_checked",
   "session_id": "sess_xyz",
   "scheme_name": "PM Kisan Samman Nidhi",
   "verdict": "ELIGIBLE",
@@ -109,6 +111,7 @@ Workflow branches: `ELIGIBLE` → Auto Approve, `PARTIAL` → Route to Review, e
 ### `conflict-detected`
 ```json
 {
+  "event": "conflict_detected",
   "document_a": "PM Kisan Samman Nidhi",
   "document_b": "PMEGP",
   "conflict_count": 3,

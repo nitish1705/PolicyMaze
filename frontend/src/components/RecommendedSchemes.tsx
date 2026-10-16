@@ -29,16 +29,16 @@ export default function RecommendedSchemes() {
     return (
       <Link
         to="/documents"
-        className="flex items-center gap-4 bg-gov-gold/10 dark:bg-gov-gold/5 border border-gov-gold/30 rounded-xl px-5 py-4 hover:border-gov-gold/60 transition-colors group"
+        className="flex items-center gap-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-5 py-4 hover:border-gov-navy/30 dark:hover:border-slate-500 transition-colors group"
       >
-        <div className="w-10 h-10 rounded-lg bg-gov-gold/20 flex items-center justify-center shrink-0">
-          <FolderOpen size={20} className="text-gov-gold" />
+        <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-slate-700 flex items-center justify-center shrink-0">
+          <FolderOpen size={20} className="text-gray-400 dark:text-slate-500" />
         </div>
         <div className="flex-1">
           <p className="text-sm font-medium text-gov-navy dark:text-slate-100">Import documents to get personalised recommendations</p>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Upload Aadhaar, income cert, etc. — we'll match you to the right schemes</p>
         </div>
-        <ArrowRight size={16} className="text-gov-gold group-hover:translate-x-1 transition-transform" />
+        <ArrowRight size={16} className="text-gov-navy dark:text-slate-400 group-hover:translate-x-1 transition-transform" />
       </Link>
     )
   }
@@ -72,12 +72,12 @@ export default function RecommendedSchemes() {
           {rec.match_reasons.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {rec.match_reasons.map((r) => (
-                <span key={r} className="text-[10px] bg-gov-gold/10 text-gov-gold border border-gov-gold/20 px-2 py-0.5 rounded-full font-medium">
+                <span key={r} className="text-[10px] bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-medium">
                   {r}
                 </span>
               ))}
               {rec.has_structured_rules && (
-                <span className="text-[10px] bg-gov-green/10 text-gov-green border border-gov-green/20 px-2 py-0.5 rounded-full font-medium">
+                <span className="text-[10px] bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-medium">
                   Rules verified
                 </span>
               )}

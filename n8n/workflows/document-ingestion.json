@@ -1,10 +1,10 @@
 {
-  "name": "Policy Maze — Document Ingestion",
+  "name": "Policy Maze — Citizen Document Upload",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "document-ingested",
+        "path": "citizen-document-uploaded",
         "responseMode": "onReceived"
       },
       "name": "Webhook",
@@ -16,21 +16,20 @@
         "conditions": {
           "number": [
             {
-              "value1": "={{ $json.rule_count }}",
+              "value1": "={{ $json.fields_extracted }}",
               "operation": "larger",
               "value2": 0
             }
           ]
         }
       },
-      "name": "Has Rules?",
+      "name": "Fields Extracted?",
       "type": "n8n-nodes-base.if",
       "position": [450, 300]
     },
     {
       "parameters": {
-        "message": "=New policy ingested: {{ $json.scheme_name }}\nRules extracted: {{ $json.rule_count }}\nConfidence: {{ $json.confidence }}",
-        "additionalFields": {}
+        "message": "=Document uploaded: {{ $json.doc_type }}\nFields extracted: {{ $json.fields_extracted }}\nDocument ID: {{ $json.document_id }}"
       },
       "name": "Notify Success",
       "type": "n8n-nodes-base.noOp",
@@ -38,10 +37,9 @@
     },
     {
       "parameters": {
-        "message": "=Warning: Policy {{ $json.scheme_name }} ingested but no rules extracted. Manual review required.",
-        "additionalFields": {}
+        "message": "=Warning: {{ $json.doc_type }} uploaded but no fields could be extracted. OCR or format may need manual review."
       },
-      "name": "Alert No Rules",
+      "name": "Alert Extraction Failed",
       "type": "n8n-nodes-base.noOp",
       "position": [650, 400]
     }
@@ -49,13 +47,13 @@
   "connections": {
     "Webhook": {
       "main": [
-        [{ "node": "Has Rules?", "type": "main", "index": 0 }]
+        [{ "node": "Fields Extracted?", "type": "main", "index": 0 }]
       ]
     },
-    "Has Rules?": {
+    "Fields Extracted?": {
       "main": [
         [{ "node": "Notify Success", "type": "main", "index": 0 }],
-        [{ "node": "Alert No Rules", "type": "main", "index": 0 }]
+        [{ "node": "Alert Extraction Failed", "type": "main", "index": 0 }]
       ]
     }
   }

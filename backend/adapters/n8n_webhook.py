@@ -29,18 +29,18 @@ async def trigger_webhook(
         return False
 
 
-async def notify_document_ingested(
+async def notify_citizen_document_uploaded(
     document_id: str,
-    scheme_name: str,
-    rule_count: int,
-    confidence: float,
+    doc_type: str,
+    fields_extracted: int,
+    user_id: str | None = None,
 ) -> bool:
-    return await trigger_webhook("document-ingested", {
-        "event": "document_ingested",
+    return await trigger_webhook("citizen-document-uploaded", {
+        "event": "citizen_document_uploaded",
         "document_id": document_id,
-        "scheme_name": scheme_name,
-        "rule_count": rule_count,
-        "confidence": confidence,
+        "doc_type": doc_type,
+        "fields_extracted": fields_extracted,
+        "user_id": user_id,
     })
 
 

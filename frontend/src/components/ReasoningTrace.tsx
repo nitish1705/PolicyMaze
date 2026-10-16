@@ -29,27 +29,21 @@ export default function ReasoningTrace({ steps }: Props) {
   const resultConfig = {
     pass: {
       icon: CheckCircle,
-      color: 'text-gov-green',
-      bg: 'bg-gov-green/5 dark:bg-gov-green/10',
-      border: 'border-gov-green/20',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      dot: 'bg-emerald-500',
       label: t('reasoning.met'),
-      labelBg: 'bg-gov-green/10 dark:bg-gov-green/20',
     },
     fail: {
       icon: XCircle,
-      color: 'text-gov-maroon',
-      bg: 'bg-gov-maroon/5 dark:bg-gov-maroon/10',
-      border: 'border-gov-maroon/20',
+      color: 'text-red-600 dark:text-red-400',
+      dot: 'bg-red-500',
       label: t('reasoning.notMetLabel'),
-      labelBg: 'bg-gov-maroon/10 dark:bg-gov-maroon/20',
     },
     unknown: {
       icon: HelpCircle,
-      color: 'text-gov-saffron',
-      bg: 'bg-gov-saffron/5 dark:bg-gov-saffron/10',
-      border: 'border-gov-saffron/20',
+      color: 'text-slate-400 dark:text-slate-500',
+      dot: 'bg-slate-400',
       label: t('reasoning.missingInfo'),
-      labelBg: 'bg-gov-saffron/10 dark:bg-gov-saffron/20',
     },
   }
 
@@ -69,72 +63,76 @@ export default function ReasoningTrace({ steps }: Props) {
         </p>
       </div>
 
-      {/* Summary bar */}
-      <div className="flex gap-3 ml-3">
+      {/* Summary counts */}
+      <div className="flex gap-4 ml-3">
         {passed > 0 && (
-          <div className="flex items-center gap-1.5 text-xs font-medium text-gov-green bg-gov-green/5 border border-gov-green/20 rounded-full px-3 py-1">
-            <CheckCircle size={12} /> {t('reasoning.criteriaMet', { count: passed })}
-          </div>
+          <span className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            {t('reasoning.criteriaMet', { count: passed })}
+          </span>
         )}
         {failed > 0 && (
-          <div className="flex items-center gap-1.5 text-xs font-medium text-gov-maroon bg-gov-maroon/5 border border-gov-maroon/20 rounded-full px-3 py-1">
-            <XCircle size={12} /> {t('reasoning.notMet', { count: failed })}
-          </div>
+          <span className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            {t('reasoning.notMet', { count: failed })}
+          </span>
         )}
         {unknown > 0 && (
-          <div className="flex items-center gap-1.5 text-xs font-medium text-gov-saffron bg-gov-saffron/5 border border-gov-saffron/20 rounded-full px-3 py-1">
-            <HelpCircle size={12} /> {t('reasoning.needMoreInfo', { count: unknown })}
-          </div>
+          <span className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-slate-400" />
+            {t('reasoning.needMoreInfo', { count: unknown })}
+          </span>
         )}
       </div>
 
-      <div className="space-y-2">
-        {steps.map((step) => {
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+        {steps.map((step, idx) => {
           const cfg = resultConfig[step.result as keyof typeof resultConfig] || resultConfig.unknown
           const Icon = cfg.icon
           const isExpanded = expandedStep === step.step
           const label = formatFieldLabel(step.field_label || step.field)
 
           return (
-            <div key={step.step} className={`${cfg.bg} border ${cfg.border} rounded-xl overflow-hidden`}>
+            <div key={step.step} className={idx !== steps.length - 1 && !isExpanded ? 'border-b border-gray-100 dark:border-slate-700' : ''}>
               <div
                 onClick={() => setExpandedStep(isExpanded ? null : step.step)}
-                className="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-750 transition-colors"
               >
-                <Icon size={20} className={cfg.color} />
+                <Icon size={16} className={cfg.color} />
                 <div className="flex-1 min-w-0">
                   <span className="font-medium text-gov-navy dark:text-slate-100 text-sm">{label}</span>
                   {step.is_exception && (
-                    <span className="ml-2 text-xs bg-gov-saffron/10 text-gov-saffron px-1.5 py-0.5 rounded">{t('reasoning.exclusionRule')}</span>
+                    <span className="ml-2 text-xs text-gray-400 dark:text-slate-500">({t('reasoning.exclusionRule')})</span>
                   )}
                 </div>
-                <span className={`text-xs font-semibold ${cfg.color} ${cfg.labelBg} px-2.5 py-1 rounded-full`}>
+                <span className={`inline-flex items-center gap-1 text-xs font-medium ${cfg.color}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                   {cfg.label}
                 </span>
-                {isExpanded ? <ChevronUp size={16} className="text-gov-navy/40 dark:text-slate-500" /> : <ChevronDown size={16} className="text-gov-navy/40 dark:text-slate-500" />}
+                {isExpanded ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
               </div>
 
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-gov-border/30 dark:border-slate-700/50 pt-3 space-y-3">
-                  <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed">
+                <div className="px-4 pb-4 border-t border-gray-100 dark:border-slate-700 pt-3 space-y-3">
+                  <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
                     {step.explanation}
                   </p>
 
                   {step.result !== 'unknown' && (
                     <div className="flex items-stretch gap-3">
-                      <div className="flex-1 bg-white dark:bg-slate-700 rounded-lg border border-gov-border dark:border-slate-600 p-3 text-center">
-                        <div className="text-[10px] uppercase tracking-wider text-gov-navy/40 dark:text-slate-500 mb-1">{t('reasoning.required')}</div>
+                      <div className="flex-1 bg-gray-50 dark:bg-slate-700 rounded-lg p-3 text-center">
+                        <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500 mb-1">{t('reasoning.required')}</div>
                         <div className="text-sm font-semibold text-gov-navy dark:text-slate-100">
                           {formatValue(step.required_value, yes, no, notProvided)}
                         </div>
                       </div>
                       <div className="flex items-center">
-                        <span className={`text-lg font-bold ${cfg.color}`}>
+                        <span className={`text-lg font-bold ${step.result === 'pass' ? 'text-emerald-600' : 'text-red-500'}`}>
                           {step.result === 'pass' ? '=' : '≠'}
                         </span>
                       </div>
-                      <div className={`flex-1 rounded-lg border p-3 text-center ${step.result === 'pass' ? 'bg-gov-green/5 dark:bg-gov-green/10 border-gov-green/20' : 'bg-gov-maroon/5 dark:bg-gov-maroon/10 border-gov-maroon/20'}`}>
-                        <div className="text-[10px] uppercase tracking-wider text-gov-navy/40 dark:text-slate-500 mb-1">{t('reasoning.yourValue')}</div>
+                      <div className="flex-1 bg-gray-50 dark:bg-slate-700 rounded-lg p-3 text-center">
+                        <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500 mb-1">{t('reasoning.yourValue')}</div>
                         <div className="text-sm font-semibold text-gov-navy dark:text-slate-100">
                           {formatValue(step.user_value, yes, no, notProvided)}
                         </div>
@@ -143,11 +141,11 @@ export default function ReasoningTrace({ steps }: Props) {
                   )}
 
                   {step.source_text && (
-                    <div className="flex items-start gap-2 bg-white/60 dark:bg-slate-700/60 rounded-lg p-3 border border-gov-border/30 dark:border-slate-600/50">
-                      <FileText size={14} className="text-gov-gold mt-0.5 shrink-0" />
+                    <div className="flex items-start gap-2 bg-gray-50 dark:bg-slate-700/60 rounded-lg p-3">
+                      <FileText size={14} className="text-gray-400 mt-0.5 shrink-0" />
                       <div>
-                        <div className="text-[10px] uppercase tracking-wider text-gov-navy/40 dark:text-slate-500 mb-0.5">{t('reasoning.sourceFromPolicy')}</div>
-                        <p className="text-xs text-gray-600 dark:text-slate-400 italic leading-relaxed">"{step.source_text}"</p>
+                        <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500 mb-0.5">{t('reasoning.sourceFromPolicy')}</div>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 italic leading-relaxed">"{step.source_text}"</p>
                       </div>
                     </div>
                   )}
