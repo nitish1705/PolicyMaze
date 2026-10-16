@@ -57,7 +57,7 @@ export default function EligibilityResult({ result }: Props) {
                 <HelpCircle size={14} className="text-slate-400 mt-0.5 shrink-0" />
                 <div>
                   <span className="font-medium text-gov-navy dark:text-slate-100">{m.field_label}</span>
-                  <span className="text-gray-500 dark:text-slate-400"> &mdash; {m.recommendation}</span>
+                  <span className="text-gray-500 dark:text-slate-400"> · {m.recommendation}</span>
                 </div>
               </div>
             ))}

@@ -20,7 +20,7 @@ export default function ExtractedRulesTable({ rules, schemeName, confidence }: P
         <div className="flex items-center gap-2">
           <div className="w-1 h-5 bg-gov-gold rounded-full" />
           <h3 className="text-base font-semibold text-gov-navy">
-            {schemeName} &mdash; {rules.length} Rules
+            {schemeName} · {rules.length} Rules
           </h3>
         </div>
         {confidence && (

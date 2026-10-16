@@ -121,7 +121,7 @@ export default function CheckEligibility() {
                   <div>
                     <p className="text-gov-navy dark:text-slate-100 font-semibold">Ready to analyze this scheme</p>
                     <p className="text-gray-500 dark:text-slate-400 text-sm mt-1 max-w-md mx-auto">
-                      Our AI will read the scheme's eligibility text and extract structured rules so we can check your eligibility.
+                      We'll read the scheme's eligibility text and extract structured rules to check your eligibility.
                     </p>
                   </div>
                   <button
@@ -142,9 +142,9 @@ export default function CheckEligibility() {
                     className="inline-flex items-center gap-2 bg-gov-navy text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gov-navy-light disabled:opacity-50 transition-colors"
                   >
                     {extracting ? (
-                      <><Loader2 size={16} className="animate-spin" /> Extracting rules with AI...</>
+                      <><Loader2 size={16} className="animate-spin" /> Extracting rules...</>
                     ) : (
-                      <><Shield size={16} /> Extract Rules & Check Eligibility</>
+                      <><Shield size={16} /> Check Eligibility</>
                     )}
                   </button>
                 </div>
@@ -194,7 +194,7 @@ export default function CheckEligibility() {
                     {missingFields.length > 0 && (
                       <div>
                         <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-2 flex items-center gap-1">
-                          <AlertCircle size={12} className="text-amber-600 dark:text-amber-400" /> Missing information &mdash; import these documents
+                          <AlertCircle size={12} className="text-amber-600 dark:text-amber-400" /> Missing information · import these documents
                         </div>
                         <div className="space-y-2">
                           {missingDocsNeeded.map((doc) => (
@@ -235,7 +235,7 @@ export default function CheckEligibility() {
 
                   {!allFieldsCovered && coveredFields.length > 0 && (
                     <p className="text-xs text-gov-navy/50 dark:text-slate-500 text-center -mt-4">
-                      You can still check with partial data — missing fields will show as "insufficient data" in the result.
+                      You can still check with partial data. Missing fields will show as "insufficient data" in the result.
                     </p>
                   )}
                 </>

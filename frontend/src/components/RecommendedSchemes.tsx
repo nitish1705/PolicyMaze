@@ -1,4 +1,4 @@
-import { ArrowRight, FolderOpen, Loader2 } from 'lucide-react'
+import { ArrowRight, FolderOpen, Loader2, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getRecommendations } from '../api/client'
@@ -36,7 +36,7 @@ export default function RecommendedSchemes() {
         </div>
         <div className="flex-1">
           <p className="text-sm font-medium text-gov-navy dark:text-slate-100">Import documents to get personalised recommendations</p>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Upload Aadhaar, income cert, etc. — we'll match you to the right schemes</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Upload Aadhaar, income cert, etc. to get matched to the right schemes</p>
         </div>
         <ArrowRight size={16} className="text-gov-navy dark:text-slate-400 group-hover:translate-x-1 transition-transform" />
       </Link>
@@ -86,7 +86,7 @@ export default function RecommendedSchemes() {
 
           {/* Description */}
           <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed line-clamp-2 flex-1">
-            {rec.description?.replace(/^Introduction:\s*/i, '') || '—'}
+            {rec.description?.replace(/^Introduction:\s*/i, '') || 'No description available'}
           </p>
 
           {/* Action */}
@@ -101,9 +101,9 @@ export default function RecommendedSchemes() {
             className="w-full flex items-center justify-center gap-1.5 bg-gov-navy text-white py-2 rounded-lg text-xs font-medium hover:bg-gov-navy-light transition-colors"
           >
             {rec.has_structured_rules && rec.document_id ? (
-              <><ArrowRight size={12} /> Check Eligibility</>
+              <><Shield size={12} /> Check Eligibility</>
             ) : (
-              <><ArrowRight size={12} /> View Scheme</>
+              <><Shield size={12} /> View Scheme</>
             )}
           </button>
         </div>

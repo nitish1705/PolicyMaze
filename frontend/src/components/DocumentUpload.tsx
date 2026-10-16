@@ -114,7 +114,7 @@ export default function DocumentUpload({ onUploaded }: Props) {
         {loading ? (
           <>
             <Loader2 size={18} className="animate-spin" />
-            Extracting rules with AI...
+            Extracting rules...
           </>
         ) : (
           <>

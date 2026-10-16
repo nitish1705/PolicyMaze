@@ -56,7 +56,13 @@ export default function MyDocumentsPage() {
     await deleteCitizenDocument(id).catch(() => {}); load()
   }
 
-  const profileEntries = Object.entries(profile).filter(([, v]) => v !== null && v !== '')
+  const HIDDEN_PROFILE_KEYS = new Set([
+    'aadhaar_card', 'pan_card', 'bank_account', 'bpl', 'income_tax_payment',
+    'is_farmer', 'is_student', 'land_ownership',
+  ])
+  const profileEntries = Object.entries(profile).filter(
+    ([k, v]) => v !== null && v !== '' && v !== true && !HIDDEN_PROFILE_KEYS.has(k)
+  )
 
   return (
     <div className="space-y-8">
@@ -67,7 +73,7 @@ export default function MyDocumentsPage() {
             <h1 className="text-xl font-bold text-gov-navy dark:text-slate-100">My Documents</h1>
           </div>
           <p className="text-gray-500 dark:text-slate-400 text-sm ml-3">
-            Upload your personal documents and we'll auto-extract your profile for eligibility checks.
+            Upload your personal documents and we'll extract your profile for eligibility checks.
           </p>
         </div>
         <button
@@ -128,7 +134,7 @@ export default function MyDocumentsPage() {
               disabled={uploading || !file || !selectedType}
               className="flex items-center gap-2 bg-gov-gold text-gov-navy px-5 py-2 rounded-lg text-sm font-semibold hover:bg-gov-gold/90 disabled:opacity-50 transition-colors"
             >
-              {uploading ? <><Loader2 size={16} className="animate-spin" /> Extracting with AI...</> : <><Upload size={16} /> Upload & Extract</>}
+              {uploading ? <><Loader2 size={16} className="animate-spin" /> Extracting details...</> : <><Upload size={16} /> Upload & Extract</>}
             </button>
             <button
               onClick={() => { setShowUpload(false); setFile(null); setError('') }}
@@ -182,7 +188,7 @@ export default function MyDocumentsPage() {
                     <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{doc.filename}</div>
                     {fieldCount > 0 && (
                       <div className="flex gap-2 mt-1.5 flex-wrap">
-                        {Object.entries(doc.extracted_fields).slice(0, 5).map(([k, v]) => (
+                        {Object.entries(doc.extracted_fields).filter(([k, v]) => v !== true && !HIDDEN_PROFILE_KEYS.has(k) && v !== null && v !== '').slice(0, 5).map(([k, v]) => (
                           <span key={k} className="text-xs bg-gov-cream dark:bg-slate-700 text-gov-navy/70 dark:text-slate-300 px-2 py-0.5 rounded">
                             {k.replace(/_/g, ' ')}: <strong>{String(v)}</strong>
                           </span>
@@ -211,7 +217,7 @@ export default function MyDocumentsPage() {
           <h3 className="font-semibold text-gov-navy dark:text-slate-100">No documents imported yet</h3>
           <p className="text-gray-500 dark:text-slate-400 text-sm mt-1 max-w-md mx-auto">
             Import your personal documents like Aadhaar Card, Income Certificate, Caste Certificate, etc.
-            Our AI will automatically extract your details for eligibility checks.
+            Your details will be extracted automatically for eligibility checks.
           </p>
           <button
             onClick={() => setShowUpload(true)}
