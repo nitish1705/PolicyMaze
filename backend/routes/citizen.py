@@ -75,9 +75,22 @@ def _extract_fields_from_text(text: str, doc_type: str, filename: str) -> dict:
         return {}
 
 
-def _extract_fields_from_image(file_path, doc_type: str, filename: str) -> dict:
-    import io
+def _ocr_image_file(file_path) -> str:
+    """Run Tesseract OCR directly on an image file (JPEG, PNG, etc.)."""
+    try:
+        from PIL import Image
+        import pytesseract
+        img = Image.open(str(file_path))
+        text = pytesseract.image_to_string(img)
+        return text.strip()
+    except Exception:
+        logger.exception("Image OCR failed for %s", file_path)
+        return ""
 
+
+def _ocr_pdf_file(file_path) -> str:
+    """Run OCR on a scanned PDF by rendering each page as an image."""
+    import io
     import pymupdf
 
     try:
@@ -92,15 +105,23 @@ def _extract_fields_from_image(file_path, doc_type: str, filename: str) -> dict:
             ocr_text = pytesseract.image_to_string(img)
             ocr_texts.append(ocr_text)
         doc.close()
-        text = "\n".join(ocr_texts).strip()
+        return "\n".join(ocr_texts).strip()
     except Exception:
-        logger.exception("OCR extraction failed")
-        return {}
+        logger.exception("PDF OCR failed for %s", file_path)
+        return ""
+
+
+def _extract_fields_from_image(file_path, doc_type: str, filename: str) -> dict:
+    fname = str(filename).lower()
+    if fname.endswith(".pdf"):
+        text = _ocr_pdf_file(file_path)
+    else:
+        text = _ocr_image_file(file_path)
 
     if not text:
         return {}
 
-    logger.info("OCR extracted %d chars from scanned PDF", len(text))
+    logger.info("OCR extracted %d chars from %s", len(text), filename)
     return _extract_fields_from_text(text, doc_type, filename)
 
 
@@ -149,14 +170,19 @@ async def upload_citizen_document(
     file_path = upload_dir / f"{uuid.uuid4().hex}_{file.filename}"
     file_path.write_bytes(content)
 
-    is_pdf = file.filename.lower().endswith(".pdf")
+    fname = file.filename.lower()
+    is_pdf = fname.endswith(".pdf")
+    is_image = fname.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"))
     text = ""
+
     if is_pdf:
         try:
             parsed = parse_pdf(file_path)
             text = parsed.markdown_text
         except Exception:
             text = ""
+    elif is_image:
+        text = _ocr_image_file(file_path)
     else:
         try:
             text = content.decode("utf-8", errors="ignore")
@@ -165,7 +191,7 @@ async def upload_citizen_document(
 
     if text.strip():
         extracted = _extract_fields_from_text(text, doc_type, file.filename)
-    elif is_pdf:
+    elif is_pdf or is_image:
         extracted = _extract_fields_from_image(file_path, doc_type, file.filename)
     else:
         extracted = {}
